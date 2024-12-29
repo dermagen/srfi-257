@@ -8,7 +8,7 @@
 ; Note: this file is made for loading intro a REPL with (scheme base) and (scheme write)
 ; libraries already imported (the latter one is only needed for tests).
 ; The system as implememted here is quite light on optimization and error checking.
-; Support for #& read syntax and boxes is commented-out, but, if uncommented, works 
+; Support for #& read syntax and boxes is commented-out, but, if uncommented, works
 ; on systems supporting both features (e.g. Chez Scheme).
 
 
@@ -42,7 +42,7 @@
                   (k (syntax-rules () ((_ () t f) t) ((_ x t f) f))))
        (b () k (classify-nonellipsis-var symbol ku kv) ku)))))
 
-(define-syntax classify-nonellipsis-var 
+(define-syntax classify-nonellipsis-var
   (syntax-rules ()
     ((_ var ku kv) ; needed for R4RS/R5RS systems where _ is a regular var
      (let-syntax ((u? (syntax-rules (var) ((_ var t f) t) ((_ x t f) f))))
@@ -60,14 +60,14 @@
 ; NB: neither set should contain ellipsis (...) and underscore (_) identifiers
 
 (define-syntax varset-minus
-  (syntax-rules () ; (_ v* mv* k () . a*) ==> (k v-mv* . a*) 
+  (syntax-rules () ; (_ v* mv* k () . a*) ==> (k v-mv* . a*)
     ((_ () mv* k rv* . a*) (k rv* . a*))
-    ((_ (v . v*) mv* k rv* . a*) 
-     (if-new-var v mv* 
+    ((_ (v . v*) mv* k rv* . a*)
+     (if-new-var v mv*
        (varset-minus v* mv* k (v . rv*) . a*)
        (varset-minus v* mv* k rv* . a*)))))
 
-; (replace-specials ell und sexp . k) invokes k with reassembled sexp, 
+; (replace-specials ell und sexp . k) invokes k with reassembled sexp,
 ; replacing ... with ell and _ with und (_ and ... are recognized according to the free-id= rules)
 
 (define-syntax replace-specials
@@ -94,7 +94,7 @@
 (define-syntax extract
   (syntax-rules ()
     ((_ _id _x _c)
-     (letrec-syntax 
+     (letrec-syntax
        ((tr (syntax-rules (_id)
               ((_ x _id tail (k il . a*)) (k (x . il) . a*))
               ((_ d (x . y) tail c) (tr x x (y . tail) c))
@@ -106,7 +106,7 @@
   (syntax-rules ()
     ((_ id* x c) (extract* () id* x c))
     ((_ il () x (k () . a*)) (k il . a*))
-    ((_ il (id . id*) x c) 
+    ((_ il (id . id*) x c)
      (extract id x (extract* il id* x c)))))
 
 
@@ -120,10 +120,10 @@
      (let ((xv exp))
        (match-var xv clause ...)))))
 
-; internal macro to jump-start var collection and code generation; 
+; internal macro to jump-start var collection and code generation;
 ; submatch below accepts only vars as first argument
 
-(define-syntax match-var 
+(define-syntax match-var
   (syntax-rules (=>)
     ((_ xv) (if #f #f))
     ((_ xv (pat (=> nv) exp ...) . clauses)
@@ -149,7 +149,7 @@
 ; kf is the failure expression, usually just a call of a variable, can be duplicated
 ; - in scanner mode, it is invoked with () for xv and kf parameters and (n) context,
 ; where n is a macro thunk, returning a list of pairs (var . tmpid), with vars unique
-; in free-id=? sense; this list is grown by syntactically rebinding n to a new list 
+; in free-id=? sense; this list is grown by syntactically rebinding n to a new list
 ; and expanding kt in its context. The main work is done by submatch, but external
 ; matchers have to cooperate by calling submatch with their sub-pattern arguments
 ; - in codegen mode, it is invoked with an id for xv and (b n) context, where n
@@ -163,7 +163,7 @@
   (syntax-rules (quote quasiquote)
     ; scan for vars
     ((_ () () (n) kt ()) kt)
-    ((_ () (quote lit) (n) kt ()) kt) 
+    ((_ () (quote lit) (n) kt ()) kt)
     ; generate code
     ((_ xv () c kt kf)
      (if (null? xv) kt kf))
@@ -175,13 +175,13 @@
      (h xv t c kt kf))
     ; scan atom for vars
     ((_ () a (n) kt ())
-     (classify a 
+     (classify a
        (syntax-error "... used as a variable name")
        kt ; _ is not a var
-       (let-syntax 
+       (let-syntax
          ((k (syntax-rules ()
                ((_ v* t*)
-                (if-new-var a v* 
+                (if-new-var a v*
                   ; rebind n to a syntax 'thunk' returning extended name-temp alist
                   (let-syntax ((n (syntax-rules () ((_ k . args) (k (a . v*) (t . t*) . args)))))
                     kt)
@@ -189,15 +189,15 @@
          (n k))
        kt))
     ; generate atom code
-    ((_ xv a (b n) kt kf) 
-     (classify a 
+    ((_ xv a (b n) kt kf)
+     (classify a
        (syntax-error "... used as a variable name")
        kt ; _ matches anything
-       (let-syntax 
+       (let-syntax
          ((k (syntax-rules ()
                ((_ v*)
                 (if-new-var a v*
-                  (let ((a xv)) 
+                  (let ((a xv))
                     ; rebind n to a syntax 'thunk' returning extended name list
                     (let-syntax ((n (syntax-rules () ((_ k . args) (k (a . v*) . args)))))
                       kt))
@@ -211,17 +211,17 @@
 
 (define-syntax submatch-qq
   (syntax-rules (unquote unquote-splicing)
-    ((_ xv ,p c kt kf) 
+    ((_ xv ,p c kt kf)
      (submatch xv p c kt kf))
-    ((_ xv (,@lp) c kt kf) 
+    ((_ xv (,@lp) c kt kf)
      (submatch xv lp c kt kf))
-    ((_ xv (,@lp . dp) c kt kf) 
+    ((_ xv (,@lp . dp) c kt kf)
      (submatch xv (~append lp `dp) c kt kf))
-    ((_ xv (ap . dp) c kt kf) 
+    ((_ xv (ap . dp) c kt kf)
      (submatch xv (~cons `ap `dp) c kt kf))
-    ((_ xv #(p ...) c kt kf) 
+    ((_ xv #(p ...) c kt kf)
      (submatch xv (~list->vector `(p ...)) c kt kf))
-    ;((_ xv #&p c kt kf) 
+    ;((_ xv #&p c kt kf)
     ; (submatch xv (~box `p) c kt kf))
     ((_ xv lit c kt kf)
      (submatch xv (quote lit) c kt kf))))
@@ -238,8 +238,8 @@
     ((_ p (rk . a*))
      (let-syntax ((n (syntax-rules () ((_ k . args) (k () () . args)))))
        (submatch () p (n) ; scan for vars protocol
-         (let-syntax 
-           ((k (syntax-rules () 
+         (let-syntax
+           ((k (syntax-rules ()
                  ((_ v* t*) (extract-pattern-vars p v* t* (rk . a*))))))
            (n k))
          ())))
@@ -249,14 +249,14 @@
 (define-syntax extract-new-pattern-vars
   (syntax-rules () ; (_ p n (rk . a*)) ==> (rk () nv* . a*)
     ((_ pat names cont)
-     (letrec-syntax 
+     (letrec-syntax
        ((step1 (syntax-rules () ((_ mv* p c) (extract-pattern-vars p (step2 mv* c)))))
         (step2 (syntax-rules () ((_ v* t* mv* c) (varset-minus v* mv* step3 () c))))
-        (step3 (syntax-rules () ((_ v-mv* (rk . a*)) (rk () v-mv* . a*))))) 
+        (step3 (syntax-rules () ((_ v-mv* (rk . a*)) (rk () v-mv* . a*)))))
        (names step1 pat cont)))))
 
 ;
-; 3) matchers used by quasiquote notation 
+; 3) matchers used by quasiquote notation
 ;
 
 (define-syntax ~cons
@@ -273,15 +273,15 @@
   (syntax-rules ()
     ((_ xv () c kt kf)
      (submatch xv '() c kt kf))
-    ((_ xv (p . p*) c kt kf) 
-     (submatch xv (~cons p (~list . p*)) c kt kf)))) 
+    ((_ xv (p . p*) c kt kf)
+     (submatch xv (~cons p (~list . p*)) c kt kf))))
 
 (define-syntax ~list->vector
   (syntax-rules ()
     ((_ () (p) (n) kt ()) ; scan for vars
      (submatch () p (n) kt ()))
     ((_ xv (p) c kt kf)
-     (if (vector? xv) 
+     (if (vector? xv)
          (let ((yv (vector->list xv))) (submatch yv p c kt kf))
          kf))))
 
@@ -304,7 +304,7 @@
          (let ((hxv (reverse rxv))) ; match head first
            (submatch hxv hp (b n) (submatch txv tp (b n) kt (b)) (b))))
        (match:append-greedy-start xv try)))
-    ((_ xv (p . p*) c kt kf) 
+    ((_ xv (p . p*) c kt kf)
      (submatch xv (~append p (~append . p*)) c kt kf))))
 
 ;(define-syntax ~box
@@ -312,14 +312,14 @@
 ;    ((_ () (p) (n) kt ()) ; scan for vars
 ;     (submatch () p (n) kt ()))
 ;    ((_ xv (p) c kt kf)
-;     (if (box? xv) 
+;     (if (box? xv)
 ;        (let ((yv (unbox xv))) (submatch yv p c kt kf))
 ;        kf))))
 
 
 ;
 ; 4) additional useful matchers, going beyond common core specified by SRFI-200
-; 
+;
 
 ; 'value' matcher compares xv with the value of runtime-calculated expression via equal?
 
@@ -344,7 +344,7 @@
        (let loop ((hxv '()) (txv xv)) ; match head first
          (define (b) (if (pair? txv) (loop (append hxv (list (car txv))) (cdr txv)) (f)))
          (submatch hxv hp (b n) (submatch txv tp (b n) kt (b)) (b)))))
-    ((_ xv (p . p*) c kt kf) 
+    ((_ xv (p . p*) c kt kf)
      (submatch xv (~append/ng p (~append/ng . p*)) c kt kf))))
 
 ; non-iterative matcher for append with fixed-length rhs list (first arg, may be improper)
@@ -356,11 +356,11 @@
 
 (define (match:append-tail-start xv n fail try) ;=> (try head tail) or (fail)
   (let loop ((l xv) (n n))
-    (if (zero? n) 
+    (if (zero? n)
         (let loop ((lag xv) (lead l) (head '()))
           (if (pair? lead)
               (loop (cdr lag) (cdr lead) (cons (car lag) head))
-              (try (reverse head) lag)))  
+              (try (reverse head) lag)))
         (if (pair? l) (loop (cdr l) (- n 1)) (fail)))))
 
 (define-syntax ~append/t
@@ -384,21 +384,21 @@
 ; single value to be matched against pattern p
 ; - tail accepts the same two continuations as start, followed by
 ; the current values of state variables; it should either call its
-; first continuation to continue with new values of state vars, 
+; first continuation to continue with new values of state vars,
 ; or the second one to signal that there are no more 'solutions'
 ; note: start head tail can be procedures add/or macros
 ; note: both try and f should be called in tail positions!
 (define-syntax ~iterate
   (syntax-rules ()
     ; scan for vars
-    ((_ () (start head tail v* p) (n) kt ()) 
+    ((_ () (start head tail v* p) (n) kt ())
      (submatch () p (n) kt ()))
     ; generate code
     ((_ xv (start head tail v* p) (b n) kt kf)
      (let ((f (lambda () kf))) ; in scope of 'parent' b
        (define (try . v*)
          (define (b) (tail try f . v*))
-         (let ((mxv (head . v*))) 
+         (let ((mxv (head . v*)))
            (submatch mxv p (b n) kt (b))))
        (start xv try f)))))
 
@@ -418,11 +418,11 @@
        (let loop ((i l))
          (define (b) (if (> i 0) (loop (- i 1)) (f)))
          (let ((hxv (subx xv 0 i))) ; match head first
-           (submatch hxv hp (b n) 
-             (let ((txv (subx xv i l))) 
+           (submatch hxv hp (b n)
+             (let ((txv (subx xv i l)))
                (submatch txv tp (b n) kt (b))) (b))))))
-  ((_ xv (x? x-length subx nullx p . p*) c kt kf) 
-   (submatch xv (~seq-append x? x-length subx nullx p 
+  ((_ xv (x? x-length subx nullx p . p*) c kt kf)
+   (submatch xv (~seq-append x? x-length subx nullx p
       (~seq-append x? x-length subx nullx . p*)) c kt kf))))
 
 (define-syntax ~seq-append/ng
@@ -438,11 +438,11 @@
       (let loop ((i 0))
         (define (b) (if (< i l) (loop (+ i 1)) (f)))
         (let ((hxv (subx xv 0 i))) ; match head first
-          (submatch hxv hp (b n) 
-            (let ((txv (subx xv i l))) 
+          (submatch hxv hp (b n)
+            (let ((txv (subx xv i l)))
               (submatch txv tp (b n) kt (b))) (b))))))
-  ((_ xv (x? x-length subx nullx p . p*) c kt kf) 
-   (submatch xv (~seq-append/ng x? x-length subx nullx p 
+  ((_ xv (x? x-length subx nullx p . p*) c kt kf)
+   (submatch xv (~seq-append/ng x? x-length subx nullx p
       (~seq-append/ng x? x-length subx nullx . p*)) c kt kf))))
 
 
@@ -454,9 +454,9 @@
 
 (define-syntax ~and
   (syntax-rules ()
-    ((_ xv () c kt kf) 
+    ((_ xv () c kt kf)
      kt)
-    ((_ xv (p) c kt kf) 
+    ((_ xv (p) c kt kf)
      (submatch xv p c kt kf))
     ((_ xv (p . p*) c kt kf)
      (submatch xv p c (submatch xv (~and . p*) c kt kf) kf))))
@@ -467,9 +467,9 @@
   (syntax-rules ()
     ((_ () p* (n) kt ()) ; scan for vars
      (submatch () (~and . p*) (n) kt ())) ; union
-    ((_ xv () c kt kf) 
+    ((_ xv () c kt kf)
      kf)
-    ((_ xv (p) c kt kf) 
+    ((_ xv (p) c kt kf)
      (submatch xv p c kt kf))
     ((_ xv p* (b n) kt kf)
      (extract-new-pattern-vars (~and . p*) n (~or xv p* (b n) kt kf)))
@@ -479,9 +479,9 @@
 
 (define-syntax match:or-aux ; helper for ~or
   (syntax-rules ()
-    ((_ xv () c kt kf) 
+    ((_ xv () c kt kf)
      kf)
-    ((_ xv (p) c kt kf) 
+    ((_ xv (p) c kt kf)
      (submatch xv p c kt kf))
     ((_ xv (p . p*) (b n) kt kf) ; kt can be duplicated
      (let ((b (lambda () (submatch xv (match:or-aux . p*) (b n) kt kf)))) ; in scope of 'parent' b
@@ -493,7 +493,7 @@
   (syntax-rules ()
     ((_ () p* (n) kt ()) kt) ; scan for vars: no vars escape
     ((_ xv (p) c kt kf)
-     (let ((t (lambda () kt)) (f (lambda () kf))) 
+     (let ((t (lambda () kt)) (f (lambda () kf)))
        (submatch xv p c (f) (t))))
     ((_ xv (p ...) c kt kf)
      (submatch xv (~and (~not p) ...) c kt kf))))
@@ -509,22 +509,22 @@
 ; is built that compares their values with the existing values of
 ; common variables of p and patterns upstream and triggers a failure
 ; if they are different; then the 'n' lists are merged for the patterns
-; downstream (this part is easy -- just scan p in the usual manner) 
+; downstream (this part is easy -- just scan p in the usual manner)
 
 (define-syntax match:etc-nl-test
-  (syntax-rules () 
+  (syntax-rules ()
     ((_ ov* () () e*) (and . e*))
     ((_ ov* (iv . iv*) (it . it*) e*)
      (if-new-var iv ov*
        (match:etc-nl-test ov* iv* it* e*)
-       (match:etc-nl-test ov* iv* it* 
+       (match:etc-nl-test ov* iv* it*
          ((equal? iv (reverse it)) . e*))))))
 
 (define-syntax ~etc
   (syntax-rules ()
     ((_ () (p) (n) kt ()) ; scan for vars
      (submatch () p (n) kt ()))
-    ((_ xv (p) c kt kf) 
+    ((_ xv (p) c kt kf)
      (extract-pattern-vars p (~etc xv p c kt kf)))
     ((_ (v ...) (t ...) xv p (b n) kt kf)
      (let loop ((lxv xv) (t '()) ...)
@@ -532,7 +532,7 @@
               (if (n match:etc-nl-test (v ...) (t ...) ())
                   (let ((v (reverse t)) ...) kt)
                   kf))
-             ((pair? lxv) 
+             ((pair? lxv)
               (let ((axv (car lxv)) (dxv (cdr lxv)))
                 (let-syntax ((n (syntax-rules () ((_ k . a*) (k () . a*)))))
                   (submatch axv p (b n) (loop dxv (cons v t) ...) kf))))
@@ -553,16 +553,16 @@
     ((_ () (x->y (a ...) => . p*) (n) kt ()) (submatch () (~and . p*) (n) kt ()))
     ; generate code
     ((_ xv (x->y => p) c kt kf)
-     (let ((yv (x->y xv))) 
+     (let ((yv (x->y xv)))
        (submatch yv p c kt kf)))
     ((_ xv (x->y => . p*) c kt kf)
-     (let ((yv (call-with-values (lambda () (x->y xv)) list))) 
+     (let ((yv (call-with-values (lambda () (x->y xv)) list)))
        (submatch yv (~list . p*) c kt kf)))
     ((_ xv (x->y (a ...) => p) c kt kf)
-     (let ((yv (x->y xv a ...))) 
+     (let ((yv (x->y xv a ...)))
        (submatch yv p c kt kf)))
     ((_ xv (x->y (a ...) => . p*) c kt kf)
-     (let ((yv (call-with-values (lambda () (x->y xv a ...)) list))) 
+     (let ((yv (call-with-values (lambda () (x->y xv a ...)) list)))
        (submatch yv (~list . p*) c kt kf)))))
 
 ; 'predicate test' matcher: when matching x,
@@ -573,7 +573,7 @@
 (define-syntax ~test
   (syntax-rules (=>)
     ; scan for vars
-    ((_ () (x?)              (n) kt ()) kt) 
+    ((_ () (x?)              (n) kt ()) kt)
     ((_ () (x? (a ...))      (n) kt ()) kt)
     ((_ () (x? => p)         (n) kt ()) (submatch () p (n) kt ()))
     ((_ () (x? (a ...) => p) (n) kt ()) (submatch () p (n) kt ()))
@@ -592,20 +592,20 @@
 ; 8) special matchers serving as building blocks for custom matchers
 ;
 
-; 'literal check' matcher : (~if-id-member a (l ...) pt pf) 
+; 'literal check' matcher : (~if-id-member a (l ...) pt pf)
 ; uses pt if a is in (l ...), pf otherwise; uses free-id=? rules
-(define-syntax ~if-id-member 
+(define-syntax ~if-id-member
   (syntax-rules ()
     ((_ xv (a (l ...) pt pf) c kt kf)
      (classify a
        (syntax-error "... used as a variable name")
-       (syntax-error "_ used as a variable name")    
+       (syntax-error "_ used as a variable name")
        (if-new-var a (l ...) (submatch xv pf c kt kf) (submatch xv pt c kt kf))
        (submatch yv pt c kt kf)))))
 
-; (~replace-specials new-ellipsis new-underscore p) matches against p after replacing 
+; (~replace-specials new-ellipsis new-underscore p) matches against p after replacing
 ; ... in p with new-ellipsis and _ with new-underscore
-(define-syntax ~replace-specials 
+(define-syntax ~replace-specials
   (syntax-rules ()
     ((_ xv (ne nu p) c kt kf)
      (replace-specials ne nu p ~replace-specials #f xv c kt kf))
@@ -630,7 +630,7 @@
     ((_ ~dm (l ...) ((* . args) p) ...)
      (define-syntax ~dm
        (syntax-rules (l ...)
-         ((_ xv args c kt kf) 
+         ((_ xv args c kt kf)
           (submatch xv p c kt kf)) ...)))))
 
 ; NB: all new matchers below are defined via define-match-pattern (no more submatch/hand-coding)
@@ -640,7 +640,7 @@
 ; 10) convenience matchers for popular scheme data types
 ;
 
-; these two matchers are already defined in section 3) : 
+; these two matchers are already defined in section 3) :
 ; (define-match-pattern ~box () ((_ p) (~and (~test box?) (~prop unbox => p))))
 ; (define-match-pattern ~list->vector () ((_ p) (~and (~test vector?) (~prop vector->list => p))))
 
@@ -730,7 +730,7 @@
 ; combined in the same way, so regular base Scheme already supplies cons, list, and
 ; scores of other functions that re-construct what similar-looking patterns de-construct:
 ;
-; pattern: (~list (~cons a b))   template (regular Scheme): (list (cons a b))   
+; pattern: (~list (~cons a b))   template (regular Scheme): (list (cons a b))
 ;
 ; This proposal's quasiquote patterns also mirror regular Scheme's quasiquote templates:
 ;
@@ -774,16 +774,16 @@
 ; In all other respects, value is just the identity macro.
 
 (define-syntax value ; need to be imported together with etc
-  (syntax-rules () ((_ x) x))) 
+  (syntax-rules () ((_ x) x)))
 
 ; scanning for template vars
 
 (define-syntax extract-template-vars
   (syntax-rules () ; (_ t rk . a*) => (rk v* . a*)
-    ((_ tpl . cont) 
+    ((_ tpl . cont)
      (letrec-syntax
-       ((err 
-         (syntax-rules () 
+       ((err
+         (syntax-rules ()
            ((_ t) (syntax-error "etc: invalid template" t))))
         (ext
          (syntax-rules (quote value) ; quasiquote
@@ -795,7 +795,7 @@
            ((_ (n t . t*)     k . a*) (ext t extcdr (n . t*) k . a*))
            ;((_ #&x            k . a*) (err #&x))
            ((_ #(x (... ...)) k . a*) (err #(x (... ...))))
-           ((_ x              k . a*) 
+           ((_ x              k . a*)
             (classify x (err x) (err x) (k (x) . a*) (k () . a*)))))
         (extcdr
          (syntax-rules ()
@@ -804,14 +804,14 @@
          (syntax-rules ()
            ((_ () rv*         k . a*) (k rv* . a*))
            ((_ (v . v*) rv*   k . a*)
-            (if-new-var v rv* (merge v* (v . rv*) k . a*) (merge v* rv* k . a*)))))) 
+            (if-new-var v rv* (merge v* (v . rv*) k . a*) (merge v* rv* k . a*))))))
        (ext tpl . cont)))))
-     
+
 ; expander for (etc <template>)
 
 (define-syntax etc
   (syntax-rules ()
-    ((_ t) 
+    ((_ t)
      (classify t
        (syntax-error "etc: ... used as a template variable")
        (syntax-error "etc: _ used as a template variable")
@@ -1236,7 +1236,7 @@
 
 (define-syntax ll-match
   (syntax-rules ()
-    ((_ x (llp . rhs) ...) 
+    ((_ x (llp . rhs) ...)
      (match x ((~llp->p llp) . rhs) ...))))
 
 (define (matcher-8 x)
@@ -1284,22 +1284,22 @@
   ((_ (x . y)) (~cons (~m5p->p x) (~m5p->p y)))
   ((_ #(x ...)) (~list->vector (~m5p->p (x ...))))
   ;((_ #&x) (~box (~m5p->p x)))
-  ((_ other) 'other)) 
+  ((_ other) 'other))
 
 (define-syntax m5-match
   (syntax-rules (=> ==>)
-    ((_ () x () (c ...)) 
+    ((_ () x () (c ...))
      (match x c ...))
-    ((_ () x ((m5p => e) m5c ...) (c ...)) 
+    ((_ () x ((m5p => e) m5c ...) (c ...))
      (m5-match () x (m5c ...) (c ... ((~m5p->p m5p) (=> n) (e n)))))
-    ((_ () x ((m5p ==> e) m5c ...) (c ...)) 
+    ((_ () x ((m5p ==> e) m5c ...) (c ...))
      (m5-match () x (m5c ...) (c ... ((~m5p->p m5p) (=> n b) (e b n)))))
     ((_ () x ((m5p e ...) m5c ...) (c ...))
      (m5-match () x (m5c ...) (c ... ((~m5p->p m5p) (begin e ...)))))
-    ((_ x m5c ...) 
+    ((_ x m5c ...)
      (m5-match () x (m5c ...) ()))))
 
-; original m5 matcher tests (avp)     
+; original m5 matcher tests (avp)
 (display "\ncustom matcher-9 test 1\n")
 (define (m5-matcher-1 x)
   (m5-match x
@@ -1397,10 +1397,10 @@
 
 (define-syntax sr-match
   (syntax-rules (=>)
-    ((_ () l* v () (c ...)) 
+    ((_ () l* v () (c ...))
      (match v c ... (_ (error "sr-match error" v))))
     ((_ () l* v ((srp . b) src ...) (c ...))
-     (sr-match () l* v (src ...) (c ... 
+     (sr-match () l* v (src ...) (c ...
        ((~replace-specials <...> <_> (~srp->p l* srp)) . b))))
     ((_ x (l ...) src ...)
      (let ((v x)) (sr-match () (l ...) v (src ...) ())))))
@@ -1435,7 +1435,7 @@
   '((((a b c d) (e f g) (h i) (j)) ((a e h j) ((b c d) (f g) (i) ())))))
 
 
-; variant of SRFI-241/DFH catamorphism matcher 
+; variant of SRFI-241/DFH catamorphism matcher
 ; (good enough to run SRFI-241 examples and tests)
 (display "\ncustom matcher-11\n")
 
@@ -1457,13 +1457,13 @@
 
 (define-syntax cm-match
   (syntax-rules (guard)
-    ((_ () l x () (c ...)) 
+    ((_ () l x () (c ...))
      (match x c ... (_ (error "cm-match error" x))))
-    ((_ () l x ((cmp (guard . e*) . b) cmc ...) (c ...)) 
-     (cm-match () l x (cmc ...)  
+    ((_ () l x ((cmp (guard . e*) . b) cmc ...) (c ...))
+     (cm-match () l x (cmc ...)
        (c ... ((~replace-specials <...> <_> (~cmp->p l cmp)) (=> n) (if (and . e*) (let () . b) (n))))))
     ((_ () l x ((cmp . b) cmc ...) (c ...))
-     (cm-match () l x (cmc ...)  
+     (cm-match () l x (cmc ...)
        (c ... ((~replace-specials <...> <_> (~cmp->p l cmp)) (let () . b)))))
     ((_ x cmc ...)
      (let l ((v x)) (cm-match () l v (cmc ...) ())))))
@@ -1539,7 +1539,7 @@
   '(((a b c d e f) #((a c e) (b d f)))))
 
 (test-matcher
-  (lambda (in) 
+  (lambda (in)
     ; NB: SRFI-241 erroneously uses 'let' in this example
     (letrec ((split
               (lambda (lis)
@@ -1581,8 +1581,8 @@
       (simple-eval in)))
   '(((+ (- 0 1) (+ 2 3)) 4)))
 
-; ellipsis-aware rhs quasiquote is not supported by cm-match, 
-; so the rhs qq SRFI-241 tests/examples are modified to use 
+; ellipsis-aware rhs quasiquote is not supported by cm-match,
+; so the rhs qq SRFI-241 tests/examples are modified to use
 ; standard rhs quasiquote
 
 (test-matcher
@@ -1613,7 +1613,7 @@
           (,x (error "invalid expression" x)))))
     (Prog x))
   '(((program (set! x 3) (+ x 4)) (begin (set! x 3) (+ x 4)))))
-   
+
 (test-matcher
   (lambda (x)
     (define Prog
@@ -1647,13 +1647,13 @@
              `(call ,rator ,@rand*))
             (,x (error "invalid expression" x))))))
     (Prog x))
-  '(((program (let ((if (if x list values))) (if 1 2 3))) 
+  '(((program (let ((if (if x list values))) (if 1 2 3)))
      (begin (let ((if (if x list values))) (call if 1 2 3))))))
 
 
 
 ; total balance
-(cond ((zero? *errors*) 
+(cond ((zero? *errors*)
        (display "\nTotal: all tests passed!\n"))
       (else
        (display "\nTotal: ") (display *errors*)

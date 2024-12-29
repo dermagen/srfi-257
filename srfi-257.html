@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- saved from url=(0042)https://malgil.com/esl/srfi/srfi-xm11.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+
     <title>SRFI ###: Simple extendable pattern matcher with backtracking</title>
     <link href="https://malgil.com/favicon.png" rel="icon" sizes="192x192" type="image/png">
     <link rel="stylesheet" href="./SRFI ###_ Simple extendable pattern matcher with backtracking_files/srfi.css" type="text/css">
@@ -28,11 +28,11 @@ The editor will add this section.</p>
 <h2 id="abstract">Abstract</h2>
 
 <p>
-Pattern matching extends Scheme's repertoire of conditional constructs, allowing 
+Pattern matching extends Scheme's repertoire of conditional constructs, allowing
 decomposition of compound data structures and binding their parts to variables.
-This SRFI proposes one such construct, <code>match</code>, which provides all 
+This SRFI proposes one such construct, <code>match</code>, which provides all
 common-denominator functionality described in <a href="https://srfi.schemers.org/srfi-200/">SRFI-200</a>,
-adding on top of it support for non-linear patterns and backtracking. Also, the 
+adding on top of it support for non-linear patterns and backtracking. Also, the
 proposed construct is modular, and allows for convenient extension via the
 <code>define-match-pattern</code> mechanism.
 </p>
@@ -44,34 +44,34 @@ proposed construct is modular, and allows for convenient extension via the
 <h2 id="rationale">Rationale</h2>
 
 <p>
-This SRFI proposes a construct with functionality similar to the one of “Wright-style” 
+This SRFI proposes a construct with functionality similar to the one of “Wright-style”
 pattern matcher (see <a href="https://srfi.schemers.org/srfi-204/">SRFI-204</a>), with the following
-differences: it supports backtracking, and it is designed in a modular way, allowing user extensions 
-not only in the form of new types of patterns, but also new pattern matching languages, such as 
+differences: it supports backtracking, and it is designed in a modular way, allowing user extensions
+not only in the form of new types of patterns, but also new pattern matching languages, such as
 the Dybvig-Friedman-Hilsdale matcher (<a href="https://srfi.schemers.org/srfi-241/">SRFI-241</a>).
 </p>
-  
+
 <p>
-This proposal is influenced by the design of the Gerbil matcher 
+This proposal is influenced by the design of the Gerbil matcher
 (<a href="https://gerbil.scheme.org/reference/gerbil/prelude/macros.html#pattern_matching">see here</a>).
 It features patterns resembling corresponding constructors, e.g. <code>(vector (cons x y))</code>,
-unlike most other designs, where patterns resemble printed representation of data, e.g. <code>#((x . y))</code>, 
+unlike most other designs, where patterns resemble printed representation of data, e.g. <code>#((x . y))</code>,
 or mix both forms to support pattern combinators such as <code>and</code>. However, while in most other designs
 the set of constructor-like pattern forms is fixed, and their names are hardwired in the design,
 the proposed construct makes  constructor-like pattern forms “first-class” components that
-can be created/imported/exported independently; they are just macros, implementing an 
+can be created/imported/exported independently; they are just macros, implementing an
 internal protocol.
 </p>
-  
+
 <p>
-The downside of this approach is that one can no longer name pattern matchers after regular 
-constructors as they cannot share the same namespace. To stay within the bounds of what can be 
-implemented via regular <code>syntax-rules</code>, the choice was made to use tilde-prefixed names, 
-so the above pattern becomes <code>(~vector (~cons x y))</code>. This convention is used for all 
+The downside of this approach is that one can no longer name pattern matchers after regular
+constructors as they cannot share the same namespace. To stay within the bounds of what can be
+implemented via regular <code>syntax-rules</code>, the choice was made to use tilde-prefixed names,
+so the above pattern becomes <code>(~vector (~cons x y))</code>. This convention is used for all
 forms of patterns except for <code>quote</code> and <code>quasiquote</code>, which have convenient
 reader abbreviations and thus are built-in into the matcher.
 </p>
-  
+
 <p>
 Traditional patterns, resembling printed representations, are supported “under quasiquote”,
 as proposed in (withdrawn) <a href="https://srfi.schemers.org/srfi-200/">SRFI-200</a>.
@@ -86,8 +86,8 @@ mechanism for pattern rewriting.
 
 <p>
 The examples below are taken from <a href="https://srfi.schemers.org/srfi-204/">SRFI-204</a>
-and adapted to demonstrate the same functionality using the proposed pattern syntax in its 
-constructor-like and quasiquoted forms: 
+and adapted to demonstrate the same functionality using the proposed pattern syntax in its
+constructor-like and quasiquoted forms:
 </p>
 
 <p> Literal patterns: </p> <pre><code>(<b>let</b> ([ls (list 'a "b" #f 2 '() #\c '#(1))])
@@ -105,14 +105,14 @@ constructor-like and quasiquoted forms:
 (<b>match</b> (list 'A 'B 'A) [`(,a B ,a) a] [_ 'fail]) ⟹ A
 (<b>match</b> (list 'A 'B 'A) [`(,a ,b ,a) a] [_ 'fail]) ⟹ A
 
-</code></pre> <p> In this proposal, quasiquoted and regular patterns can be arbitrarily combined: </p> 
+</code></pre> <p> In this proposal, quasiquoted and regular patterns can be arbitrarily combined: </p>
 <pre><code>(<b>let</b> ([x '(1 2 3 4)])
   (list (<b>match</b> x [(~cons a (~append b (~list c))) (list a b c)])
         (<b>match</b> x [(~cons a `(,@b ,@(~list c))) (list a b c)])
         (<b>match</b> x [(~cons a `(,@b ,c)) (list a b c)])
         (<b>match</b> x [`(,a ,@b ,c) (list a b c)])))
 ⟹ ((1 (2 3) 4) (1 (2 3) 4) (1 (2 3) 4) (1 (2 3) 4))
-  
+
 </code></pre> <p> Ellipsis (<code>~etc</code>) and tail patterns: </p> <pre><code>(<b>match</b> (list 1 2) [(~list* 1 2 (~etc 3)) #t]) ⟹ #t
 (<b>match</b> (list 1 2 3) [(~list* 1 2 (~etc 3)) #t]) ⟹ #t
 (<b>match</b> (list 1 2 3 3 3) [(~list* 1 2 (~etc 3)) #t]) ⟹ #t
@@ -120,7 +120,7 @@ constructor-like and quasiquoted forms:
 (<b>match</b> '((a time) (stitch saves) (in nine)) [(~etc (~list x y)) (list x y)])
 ⟹ ((a stitch in) (time saves nine))
 
-(<b>match</b> '((a b) (c d) (e f)) [(~etc (~list x y)) (list x y)]) 
+(<b>match</b> '((a b) (c d) (e f)) [(~etc (~list x y)) (list x y)])
 ⟹ ((a c e) (b d f))
 
 (<b>define</b> (transpose x)
@@ -150,27 +150,27 @@ treated in accordance with the regular quasquote rules, rather than being turned
 (<b>match</b> '(1 2 . 3) [`(1 2 ,@3) #t] [_ #f]) ⟹ #t ;</code> WSM returns <code>#f
 (<b>match</b> (list 1 2 3 3 3) [`(1 2 ,@3) #t] [_ #f]) ⟹ #f ;</code> WSM returns <code>#t
 
-</code></pre> <p> WSM-compatible behavior can be imitated by explicit insertion of <code>~etc</code>:  </p> 
+</code></pre> <p> WSM-compatible behavior can be imitated by explicit insertion of <code>~etc</code>:  </p>
 <pre><code>(<b>match</b> (list 1 2) [`(1 2 ,@(~etc 3)) #t] [_ #f]) ⟹ #t
 (<b>match</b> '(1 2 . 3) [`(1 2 ,@(~etc 3)) #t] [_ #f]) ⟹ #f
 (<b>match</b> (list 1 2 3 3 3) [`(1 2 ,@(~etc 3)) #t] [_ #f]) ⟹ #t
-  
-</code></pre> <p> Unlike WSM, this proposal supports non-linearity in and out of “ellipsis” patterns: </p> 
-<pre><code>(<b>match</b> '((1 2 3 4) ((1) (2) (3) (4)) (1 2 3 4)) 
-  [(~list a* (~etc (~list a*)) a*) a*]) 
+
+</code></pre> <p> Unlike WSM, this proposal supports non-linearity in and out of “ellipsis” patterns: </p>
+<pre><code>(<b>match</b> '((1 2 3 4) ((1) (2) (3) (4)) (1 2 3 4))
+  [(~list a* (~etc (~list a*)) a*) a*])
 ⟹ (1 2 3 4)
 
-</code></pre> 
-<p>Some WSM postfix operators do not have built-in equivalents, but can be easily defined. 
+</code></pre>
+<p>Some WSM postfix operators do not have built-in equivalents, but can be easily defined.
 An analog of WSM <code>**1</code> can be defined as follows: </p> <pre><code>(<b>define-match-pattern</b> ~etc+ ()
   [(~etc+ p) (~pair? (~etc p))])
 
 (<b>match</b> (list 1 2) [(~list* a b (~etc+ c)) c] [_ #f]) ⟹ #f
-(<b>match</b> (list 1 2 3) [(~list* a b (~etc+ c)) c] [_ #f]) ⟹ (3) 
+(<b>match</b> (list 1 2 3) [(~list* a b (~etc+ c)) c] [_ #f]) ⟹ (3)
 
 </code></pre> <p> An analog of WSM <code>=..</code> <i>k</i> can be defined as follows: </p> <pre><code>(<b>define-match-pattern</b> ~etc= ()
-  [(~etc= k p) 
-   (~and (~list? (~prop length =&gt; k)) 
+  [(~etc= k p)
+   (~and (~list? (~prop length =&gt; k))
          (~etc p))])
 
 (<b>match</b> '((a b) (c d) (e f))
@@ -184,8 +184,8 @@ An analog of WSM <code>**1</code> can be defined as follows: </p> <pre><code>(<b
 ⟹ fail
 
 </code></pre> <p> An analog of WSM <code>*..</code> <i>k</i> <i>j</i> can be defined as follows: </p> <pre><code>(<b>define-match-pattern</b> ~etc** ()
-  [(~etc** k j p) 
-   (~and (~list? (~prop length =&gt; (~and (~test &gt;= (k)) (~test &lt;= (j))))) 
+  [(~etc** k j p)
+   (~and (~list? (~prop length =&gt; (~and (~test &gt;= (k)) (~test &lt;= (j)))))
          (~etc p))])
 
 (<b>match</b> '((a b) (c d) (e f))
@@ -260,17 +260,17 @@ It is an error for a pattern to refer to the same variable inside and outside of
 (<b>match</b> 1 [(~not 2) #t]) ⟹ #t
 
 </code></pre> <p> Predicates and fields are supported via <code>~?</code> and <code>~=</code>
-respectively.  
+respectively.
 It is an error to refer to pattern variables in non-subpattern parts of these patterns.
-</p> 
+</p>
 
 <pre><code>(<b>match</b> 1 [(~? odd? x) x]) ⟹ 1
 (<b>match</b> '(a) [(~= car x) x]) ⟹ a
 
 </code></pre> <p>Tests that use more than one pattern variable should be implemented
 in the body of the corresponding rule:
-</p> 
-  
+</p>
+
 <pre><code>(<b>define</b> (fibby? x)
   (<b>match</b> x
     [(~list* a b c rest)
@@ -287,75 +287,75 @@ in the body of the corresponding rule:
 <h3 id="examplesadv">Advanced Examples</h3>
 
 <p>
-This section contains examples specific to new functionality proposed in this SRFI.   
+This section contains examples specific to new functionality proposed in this SRFI.
 </p>
 
 <h4 id="examplesbt">Backtracking</h4>
 
 <p>
-Some patterns marked as “iterative” in this proposal may match the input object 
-in multiple ways, or “solutions”, backtracking to the next solution if the current 
-one causes downstream patterns to fail (structurally or because of a disagreement 
-in values of shared pattern variables). This process may be time-consuming, but 
-is associated only with iterative patterns, causing no overhead if they are not 
+Some patterns marked as “iterative” in this proposal may match the input object
+in multiple ways, or “solutions”, backtracking to the next solution if the current
+one causes downstream patterns to fail (structurally or because of a disagreement
+in values of shared pattern variables). This process may be time-consuming, but
+is associated only with iterative patterns, causing no overhead if they are not
 used.</p>
 
 <p>
-Iteration strategies vary between pattern types. 
+Iteration strategies vary between pattern types.
 Regular versions of append matchers are greedy, giving preference
-to long leftmost segments: 
-</p> 
+to long leftmost segments:
+</p>
 
 <pre><code>(<b>define</b> (pr* p . x*)
   (for-each (<b>lambda</b> (x) (display x p)) x*))
 
-(<b>let</b> ([p (open-output-string)]) 
+(<b>let</b> ([p (open-output-string)])
   (<b>match</b> "abc"
-    [(~string-append a (~string b) c) 
+    [(~string-append a (~string b) c)
      (=&gt; next) (pr* p "1:" a "+" b "+" c ";") (next)]
-    [(~string-append a c)           
+    [(~string-append a c)
      (=&gt; next) (pr* p "2:" a "+" c ";") (next)]
     [x (get-output-string p)]))
 ⟹ "1:ab+c+;2:abc+;"
-</code></pre> 
+</code></pre>
 
-<p> Non-greedy appends give preference to short leftmost segments: </p> 
+<p> Non-greedy appends give preference to short leftmost segments: </p>
 
-<pre><code>(<b>let</b> ([p (open-output-string)]) 
+<pre><code>(<b>let</b> ([p (open-output-string)])
   (<b>match</b> "abc"
-    [(~string-append/ng a (~string b) c) 
+    [(~string-append/ng a (~string b) c)
      (=&gt; next) (pr* p "1:" a "+" b "+" c ";") (next)]
-    [(~string-append/ng a c)           
+    [(~string-append/ng a c)
      (=&gt; next) (pr* p "2:" a "+" c ";") (next)]
     [x (get-output-string p)]))
 ⟹ "1:+a+bc;2:+abc;"
-</code></pre> 
+</code></pre>
 
 <p> Backtracking can be triggered explicitly from the body; calling “back”
 guard formal retries starting from the current pattern's most recent backtracking
-point or next rule if none left: </p> 
+point or next rule if none left: </p>
 
-<pre><code>(<b>let</b> ([p (open-output-string)]) 
+<pre><code>(<b>let</b> ([p (open-output-string)])
   (<b>match</b> "abc"
-    [(~string-append a (~string b) c) 
+    [(~string-append a (~string b) c)
      (=&gt; next back) (pr* p "1:" a "+" b "+" c ";") (back)]
-    [(~string-append a c)           
+    [(~string-append a c)
      (=&gt; next back) (pr* p "2:" a "+" c ";") (back)]
     [x (get-output-string p)]))
 ⟹ "1:ab+c+;1:a+b+c;1:+a+bc;2:abc+;2:ab+c;2:a+bc;2:+abc;"
 </code></pre>
-  
+
 <h4 id="examplescm">Custom match forms</h4>
 
 <p>
-It is relatively easy to define custom match forms with a different pattern grammar 
-using a combination of “converter” patterns defined via <code>define-match-pattern</code> 
-and regular <code>syntax-rule</code> -based macro for the form itself. This process is 
-facilitated by a collection of special-purpose patterns, as shown below.  
+It is relatively easy to define custom match forms with a different pattern grammar
+using a combination of “converter” patterns defined via <code>define-match-pattern</code>
+and regular <code>syntax-rule</code> -based macro for the form itself. This process is
+facilitated by a collection of special-purpose patterns, as shown below.
 </p>
 
 <p>
-Defining an analog of Dybvig-Friedman-Hilsdale matcher with support for catamorphism feature:  
+Defining an analog of Dybvig-Friedman-Hilsdale matcher with support for catamorphism feature:
 </p>
 
 <pre><code>(<b>define-match-pattern</b> ~cmp-&gt;p (&lt;...&gt; &lt;_&gt; unquote -&gt;)
@@ -373,15 +373,15 @@ Defining an analog of Dybvig-Friedman-Hilsdale matcher with support for catamorp
 
 (<b>define-syntax</b> cm-match
   (<b>syntax-rules</b> (guard)
-    [(_ () l x () (c ...)) 
+    [(_ () l x () (c ...))
      (<b>match</b> x c ... [_ (error "cm-match error" x)])]
-    [(_ () l x ([cmp (guard . e*) . b] cmc ...) (c ...)) 
-     (<b>cm-match</b> () l x (cmc ...)  
-       (c ... [(~replace-specials &lt;...&gt; &lt;_&gt; (~cmp-&gt;p l cmp)) 
+    [(_ () l x ([cmp (guard . e*) . b] cmc ...) (c ...))
+     (<b>cm-match</b> () l x (cmc ...)
+       (c ... [(~replace-specials &lt;...&gt; &lt;_&gt; (~cmp-&gt;p l cmp))
                  (=&gt; n) (<b>if</b> (<b>and</b> . e*) (<b>let</b> () . b) (n))]))]
     [(_ () l x ([cmp . b] cmc ...) (c ...))
-     (<b>cm-match</b> () l x (cmc ...)  
-       (c ... [(~replace-specials &lt;...&gt; &lt;_&gt; (~cmp-&gt;p l cmp)) 
+     (<b>cm-match</b> () l x (cmc ...)
+       (c ... [(~replace-specials &lt;...&gt; &lt;_&gt; (~cmp-&gt;p l cmp))
                  (<b>let</b> () . b)]))]
     [(_ x cmc ...)
      (<b>let</b> l ([v x]) (<b>cm-match</b> () l v (cmc ...) ()))]))
@@ -391,12 +391,12 @@ Defining an analog of Dybvig-Friedman-Hilsdale matcher with support for catamorp
 Note the use of <code>~replace-specials</code> pattern that substitutes
 <code>&lt;...&gt; &lt;_&gt;</code> for special <code>... _</code> identifiers
 to allow them to have their regular meaning inside <code>define-match-pattern</code>.
-It also uses the <code>~append/t</code> pattern, a non-iterative list append 
+It also uses the <code>~append/t</code> pattern, a non-iterative list append
 that takes the length of the tail segment from its first argument.
 </p>
-<p> 
+<p>
 Defined in this manner, <code>cm-match</code> can be used as D-F-H <code>match</code>
-w.r.t. matching functionality (no enhanced right-hand-side <code>quasiquote</code>): 
+w.r.t. matching functionality (no enhanced right-hand-side <code>quasiquote</code>):
 </p>
 
 <pre><code>(<b>let</b> ([simple-eval
@@ -422,10 +422,10 @@ w.r.t. matching functionality (no enhanced right-hand-side <code>quasiquote</cod
                    `(,y . ,evens))]))])
   (split '(a b c d e f)))
 ⟹
-(a c e) 
+(a c e)
 (b d f)
 
-</code></pre> <p> Defining a <code>syntax-rules</code> -like matcher with explicit list of literal identifiers: </p> 
+</code></pre> <p> Defining a <code>syntax-rules</code> -like matcher with explicit list of literal identifiers: </p>
 
 <pre><code>(<b>define-match-pattern</b> ~srp-&gt;p (&lt;...&gt; &lt;_&gt;)
   [(_ l* ()) '()]
@@ -438,22 +438,22 @@ w.r.t. matching functionality (no enhanced right-hand-side <code>quasiquote</cod
 
 (<b>define-syntax</b> sr-match
   (<b>syntax-rules</b> (=&gt;)
-    [(_ () l* v () (c ...)) 
+    [(_ () l* v () (c ...))
      (<b>match</b> v c ... [_ (error "sr-match error" v)])]
     [(_ () l* v ([srp . b] src ...) (c ...))
-     (sr-match () l* v (src ...) (c ... 
+     (sr-match () l* v (src ...) (c ...
        [(~replace-specials &lt;...&gt; &lt;_&gt; (~srp-&gt;p l* srp)) . b]))]
     [(_ x (l ...) src ...)
      (<b>let</b> ([v x]) (sr-match () (l ...) v (src ...) ()))]))
-</code></pre> 
+</code></pre>
   <p> Note the use of <code>~if-id-member</code> pattern to check if an atom is a literal.  </p>
 
-<pre><code>(sr-match '(begin (a 5) (b 6) (c 7) (d 8)) 
+<pre><code>(sr-match '(begin (a 5) (b 6) (c 7) (d 8))
   (begin)
   [(begin (x* y*) ...) (list x* y*)])
 ⟹ ((a b c d) (5 6 7 8))
 
-(sr-match '((a b c d) (e f g) (h i) (j)) 
+(sr-match '((a b c d) (e f g) (h i) (j))
   ()
   [((x* y** ...) ...) (list x* y**)])
 ⟹ ((a e h j) ((b c d) (f g) (i) ()))
@@ -534,44 +534,44 @@ rules in the order they are written until a matching rule is found. If no matchi
 </p>
 
 <p>
-A rule matches if the application of its pattern to the input object is successful and there is 
+A rule matches if the application of its pattern to the input object is successful and there is
 no “guard clause” (a list of <code>=&gt;</code> keyword followed by one or two identifiers). If a guard
 clause is present, it binds the identifiers to procedures allowing advanced control over the matching
 process. The first procedure, bound within the body to ⟨<i>next id</i> ⟩, allows
 one to skip the current rule as if its pattern match was unsuccessful. In two-identifier guard clauses,
 the second procedure, bound within the body to ⟨<i>back id</i> ⟩, allows one to
-tell the matcher that the current pattern should consider another way to match, or, if no such way exists, 
+tell the matcher that the current pattern should consider another way to match, or, if no such way exists,
 skip the pattern as if its attempts to match were unsuccessful.
-Both procedures accept no arguments and can be called from any <i>tail position</i> within the 
+Both procedures accept no arguments and can be called from any <i>tail position</i> within the
 body. If these procedures called in a different way, the behavior is undefined.
 </p>
 
 <p>
-Patterns may contain <i>pattern variables</i>, which, if the application of a pattern suceeds, become 
-bound in the corresponding body to parts of the input object. The values of these variables may be 
+Patterns may contain <i>pattern variables</i>, which, if the application of a pattern suceeds, become
+bound in the corresponding body to parts of the input object. The values of these variables may be
 used to reject the match via the guard clause mechanism described above.
 </p>
 
 <p>
-Any pattern containing pattern variables may use the same variable in more than one place within the 
-pattern. In such cases all the corresponding sub-objects, assigned to the repeated variable, 
-should “agree”, i.e. to be the same according to the <code>equal?</code> predicate. 
+Any pattern containing pattern variables may use the same variable in more than one place within the
+pattern. In such cases all the corresponding sub-objects, assigned to the repeated variable,
+should “agree”, i.e. to be the same according to the <code>equal?</code> predicate.
 </p>
 
 <p>
-Some patterns, marked as <i>(iterative)</i>  in pattern entry's header line, may match the input 
-object in multiple ways. The matcher tries these different matches in the order specified in the 
-pattern description. The two common orders are <i>(iterative, greedy)</i> , maximizing the number 
-of input elements matched by sub-patterns on the left, and <i>(iterative, non-greedy)</i> , maximizing 
-the number of input elements matched by sub-patterns on the right. When iterative patterns are 
-nested, the matcher acts as if the outer pattern has full control over the decomposition of the input object, 
-allowing its immediate sub-patterns to work with the parts in the order the outer pattern supplies them. 
+Some patterns, marked as <i>(iterative)</i>  in pattern entry's header line, may match the input
+object in multiple ways. The matcher tries these different matches in the order specified in the
+pattern description. The two common orders are <i>(iterative, greedy)</i> , maximizing the number
+of input elements matched by sub-patterns on the left, and <i>(iterative, non-greedy)</i> , maximizing
+the number of input elements matched by sub-patterns on the right. When iterative patterns are
+nested, the matcher acts as if the outer pattern has full control over the decomposition of the input object,
+allowing its immediate sub-patterns to work with the parts in the order the outer pattern supplies them.
 </p>
 
 <h3 id="specification">Basic patterns</h3>
 
 <p>
-⟨<i>atomic datum</i> ⟩ &nbsp;&nbsp;<i>match pattern</i><br>  
+⟨<i>atomic datum</i> ⟩ &nbsp;&nbsp;<i>match pattern</i><br>
 Literal patterns, ⟨<i>boolean</i> ⟩, …,
 ⟨<i>bytevector</i> ⟩, match equal objects (in terms of
 Scheme <code>equal?</code> predicate).
@@ -579,7 +579,7 @@ Scheme <code>equal?</code> predicate).
 
 <p>
 <code><b>_</b></code> &nbsp;&nbsp;<i>match pattern</i><br>
-The ⟨<i>underscore</i> ⟩ pattern matches anything. It is 
+The ⟨<i>underscore</i> ⟩ pattern matches anything. It is
 not a variable, so it produces no bindings visible in the body of the rule.
 </p>
 
@@ -587,8 +587,8 @@ not a variable, so it produces no bindings visible in the body of the rule.
 ⟨<i>match pattern identifier</i> ⟩ &nbsp;&nbsp;<i>match pattern</i><br>
 The ⟨<i>match pattern identifier</i> ⟩ pattern acts like a
 pattern variable. A pattern variable will match any value and can be repeated.
-If repeated, all subsequent like-named variables will only match the value that 
-is <code>equal?</code> to the value matched by the first. This value is made 
+If repeated, all subsequent like-named variables will only match the value that
+is <code>equal?</code> to the value matched by the first. This value is made
 available inside ⟨<i>body</i> ⟩ as if a local identifier
 with the same name is bound to this value via the <code>let</code> form surrounding
 the body. It is an error to refer to pattern identifiers in expressions within
@@ -596,18 +596,18 @@ the same pattern, or to use them as ⟨<i>match pattern name</i> ⟩s.
 </p>
 
 <p>
-<code>(<b>quote</b></code> ⟨<i>datum</i> ⟩<code>)</code>&nbsp;&nbsp;<i>match pattern</i><br>  
-The <code>quote</code> pattern matches ⟨<i>datum</i> ⟩ (again, Scheme <code>equal?</code> 
-predicate is used for comparison).  
+<code>(<b>quote</b></code> ⟨<i>datum</i> ⟩<code>)</code>&nbsp;&nbsp;<i>match pattern</i><br>
+The <code>quote</code> pattern matches ⟨<i>datum</i> ⟩ (again, Scheme <code>equal?</code>
+predicate is used for comparison).
 </p>
 
 <p>
 <code>(<b>quasiquote</b></code> ⟨<i>match quasipattern</i> ⟩<code>)</code>&nbsp;&nbsp;<i>match pattern</i><br>
 The <code>quasiquote</code> pattern can be understood in terms of regular patterns. It is translated
-into combinations of basic patterns and data patterns (see below). The translation 
-function T[⟨<i>match quasipattern</i> ⟩] ⟹ ⟨<i>match pattern</i> ⟩ 
+into combinations of basic patterns and data patterns (see below). The translation
+function T[⟨<i>match quasipattern</i> ⟩] ⟹ ⟨<i>match pattern</i> ⟩
 resembles simplified translation of the regular <code>quasiquote</code> form (shown in
-abbreviated form, first matching rule is chosen): 
+abbreviated form, first matching rule is chosen):
 </p>
 <table>
   <tbody><tr><td>T[<code>()</code>]</td> <td>&nbsp;⟹&nbsp;</td> <td><code>(quote ())</code></td></tr>
@@ -616,64 +616,64 @@ abbreviated form, first matching rule is chosen):
     <td>&nbsp;⟹&nbsp;</td> <td>⟨<i>mp</i> ⟩</td></tr>
   <tr><td>T[<code>((unquote-splicing</code> ⟨<i>mp</i> ⟩<code>))</code>]</td>
     <td>&nbsp;⟹&nbsp;</td> <td>⟨<i>mp</i> ⟩</td></tr>
-  <tr><td>T[<code>((unquote-splicing</code> ⟨<i>mp</i> ⟩<code>)</code> <code>.</code> 
+  <tr><td>T[<code>((unquote-splicing</code> ⟨<i>mp</i> ⟩<code>)</code> <code>.</code>
      ⟨<i>mqp</i> ⟩<code>)</code>]</td>
     <td>&nbsp;⟹&nbsp;</td> <td><code>(<b>~append</b></code> ⟨<i>mp</i> ⟩
        T[⟨<i>mqp</i> ⟩]<code>)</code></td></tr>
-  <tr><td>T[<code>(</code>⟨<i>mqp</i> <sub>1</sub>⟩ <code>.</code> 
+  <tr><td>T[<code>(</code>⟨<i>mqp</i> <sub>1</sub>⟩ <code>.</code>
     ⟨<i>mqp</i> <sub>2</sub>⟩<code>)]</code></td>
     <td>&nbsp;⟹&nbsp;</td> <td><code>(<b>~cons</b></code> T[⟨<i>mqp</i> <sub>1</sub>⟩]
        T[⟨<i>mqp</i> <sub>2</sub>⟩]<code>)</code></td></tr>
   <tr><td>T[<code>#(</code>⟨<i>mqp</i> ⟩*)]</td>
-    <td>&nbsp;⟹&nbsp;</td> <td><code>(<b>~vector</b></code> 
+    <td>&nbsp;⟹&nbsp;</td> <td><code>(<b>~vector</b></code>
       T[⟨<i>mqp</i> <sub>1</sub>⟩]*<code>)</code></td></tr>
 </tbody></table>
 
 <h3 id="specification">The Value pattern</h3>
 
 <p>
-  <code>(<b>~value</b></code> ⟨<i>expression</i> ⟩<code>)</code>&nbsp;&nbsp;<i>match pattern</i><br>  
-  The <code>~value</code> pattern matches if the input object is equal to the result of 
-  ⟨<i>expression</i> ⟩, calculated during the match (Scheme <code>equal?</code> 
+  <code>(<b>~value</b></code> ⟨<i>expression</i> ⟩<code>)</code>&nbsp;&nbsp;<i>match pattern</i><br>
+  The <code>~value</code> pattern matches if the input object is equal to the result of
+  ⟨<i>expression</i> ⟩, calculated during the match (Scheme <code>equal?</code>
   predicate is used for comparison). This is a convenient way to match against non-pattern variables,
-  bound outside the <code>match</code> form. 
+  bound outside the <code>match</code> form.
 </p>
-  
+
 
 <h3 id="specification">List patterns</h3>
 
 <p>List patterns match various types of pairs/lists, disassembling them into sub-expressions
 and applying to them sub-patterns. They are named to resemble the corresponding Scheme constructors
-and can be combined in a similar manner. Their names are not built-in into the matcher, but 
-are defined via <code>define-syntax</code> or its equivalent, so they need to be imported 
-if used explicitly. 
+and can be combined in a similar manner. Their names are not built-in into the matcher, but
+are defined via <code>define-syntax</code> or its equivalent, so they need to be imported
+if used explicitly.
 </p>
 
 <p>
 <code>(<b>~cons</b></code> ⟨<i>mp</i> <sub>a</sub>⟩ ⟨<i>mp</i> <sub>d</sub>⟩<code>)</code>
-  &nbsp;&nbsp;<i>match pattern</i><br>  
-The <code>~cons</code> pattern matches a pair, which <i>car</i>  matches 
+  &nbsp;&nbsp;<i>match pattern</i><br>
+The <code>~cons</code> pattern matches a pair, which <i>car</i>  matches
 ⟨<i>mp</i> <sub>a</sub>⟩ and <i>cdr</i>  matches
 ⟨<i>mp</i> <sub>d</sub>⟩.
 </p>
 
 <p>
   <code>(<b>~list</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~list</code> pattern matches a proper list, with as many elements
-  as there are sub-patterns ⟨<i>mp</i> ⟩ … The elements 
-  should match the corresponding patterns. 
+  as there are sub-patterns ⟨<i>mp</i> ⟩ … The elements
+  should match the corresponding patterns.
 </p>
 
 <p>
   <code>(<b>~append</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern (iterative, greedy)</i><br>  
+    &nbsp;&nbsp;<i>match pattern (iterative, greedy)</i><br>
   The <code>~append</code> pattern matches a (possibly improper) list, breaking it into
-  sub-list segments that can match the corresponding patterns 
-  ⟨<i>mp</i> ⟩ … If the list is improper, the last 
+  sub-list segments that can match the corresponding patterns
+  ⟨<i>mp</i> ⟩ … If the list is improper, the last
   pattern is applied to its improper tail segment.<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  This is an example of a <i>iterative</i>  
-  pattern that may match the target list in many different ways; all “solutions” are equally good, 
+  &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  This is an example of a <i>iterative</i>
+  pattern that may match the target list in many different ways; all “solutions” are equally good,
   as long as the segments can be appended via <code>append</code> to make a list, equal to the original.<br>
   &nbsp;&nbsp;&nbsp;&nbsp;The solutions are tried starting with ones maximizing the length of the leftmost
   segment, then the segment after it, etc.
@@ -681,7 +681,7 @@ The <code>~cons</code> pattern matches a pair, which <i>car</i>  matches
 
 <p>
   <code>(<b>~append/ng</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern (iterative, non-greedy)</i><br>  
+    &nbsp;&nbsp;<i>match pattern (iterative, non-greedy)</i><br>
   The <code>~append/ng</code> pattern is a “non-greedy” variant of the
   <code>~append</code> pattern. The solutions are tried starting with the ones maximizing
   the length of the rightmost segment, then the segment before it, etc.
@@ -689,13 +689,13 @@ The <code>~cons</code> pattern matches a pair, which <i>car</i>  matches
 
 <p>
   <code>(<b>~append/t</b></code> ⟨<i>datum</i> ⟩ ⟨<i>mp</i> <sub>1</sub>⟩ ⟨<i>mp</i> <sub>2</sub>⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~append/t</code> pattern matches a (possibly improper) list, breaking it
-  into two sub-list segments to be matched against ⟨<i>mp</i> <sub>1</sub>⟩ and 
-  ⟨<i>mp</i> <sub>2</sub>⟩ sub-patterns.<br> 
+  into two sub-list segments to be matched against ⟨<i>mp</i> <sub>1</sub>⟩ and
+  ⟨<i>mp</i> <sub>2</sub>⟩ sub-patterns.<br>
   &nbsp;&nbsp;&nbsp;&nbsp;The number of pairs in the “spine”
-  of the second segment is assumed to be equal to the number of “spine” pairs in the 
-  ⟨<i>datum</i> ⟩ argument. The pattern fails if the input list is 
+  of the second segment is assumed to be equal to the number of “spine” pairs in the
+  ⟨<i>datum</i> ⟩ argument. The pattern fails if the input list is
   too short to be broken in this way.<br>
   &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  This is a non-iterative pattern, providing
   a degree of efficiency where the length of the tail pattern is known at macroexpand time.
@@ -703,14 +703,14 @@ The <code>~cons</code> pattern matches a pair, which <i>car</i>  matches
 
 <p>
   <code>(<b>~etc</b></code> ⟨<i>mp</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
-  The <code>~etc</code> pattern matches a proper list such that every one 
-  of its elements matches ⟨<i>mp</i> ⟩. If this sub-pattern 
+    &nbsp;&nbsp;<i>match pattern</i><br>
+  The <code>~etc</code> pattern matches a proper list such that every one
+  of its elements matches ⟨<i>mp</i> ⟩. If this sub-pattern
   contains pattern vars, they will be bound to lists of values obtained via
-  individual element matches in the order of their appearance in the input 
+  individual element matches in the order of their appearance in the input
   list. This pattern can be compared to the postfix ellipsis (<code>...</code>)
   notation popularized by <code>syntax-rules</code>.<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  If one or more sub-pattern 
+  &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  If one or more sub-pattern
   variables are also used outside <code>~etc</code> in the same rule-level pattern,
   the non-linear “agreement” rule is applied to the final list values collected
   by <code>~etc</code> pattern on a successful match.
@@ -721,31 +721,31 @@ The <code>~cons</code> pattern matches a pair, which <i>car</i>  matches
 <p>
 A limited set of vector patterns is provided. Advanced matching of vectors
 can be performed either by combining list patterns with <code>~list-&gt;vector</code>
-converter pattern, or by using core patterns described further below. 
+converter pattern, or by using core patterns described further below.
 </p>
 
 <p>
   <code>(<b>~vector</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~vector</code> pattern matches a vector with as many elements
-  as there are sub-patterns ⟨<i>mp</i> ⟩ … The elements 
-  should match the corresponding patterns. 
+  as there are sub-patterns ⟨<i>mp</i> ⟩ … The elements
+  should match the corresponding patterns.
 </p>
 
 <p>
   <code>(<b>~vector-append</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern (iterative, greedy)</i><br>  
+    &nbsp;&nbsp;<i>match pattern (iterative, greedy)</i><br>
   The <code>~vector-append</code> pattern matches a vector, breaking it into
-  sub-vector segments that can match the corresponding patterns 
+  sub-vector segments that can match the corresponding patterns
   ⟨<i>mp</i> ⟩ … <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  This is another example of an <i>iterative</i>  
-  pattern that may match the target vector in many different ways; the “solutions” are attempted starting 
+  &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  This is another example of an <i>iterative</i>
+  pattern that may match the target vector in many different ways; the “solutions” are attempted starting
   with ones maximizing the length of the leftmost segment, then the segment after it, etc.
 </p>
 
 <p>
   <code>(<b>~vector-append/ng</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern (iterative, non-greedy)</i><br>  
+    &nbsp;&nbsp;<i>match pattern (iterative, non-greedy)</i><br>
   The <code>~vector-append/ng</code> pattern is a “non-greedy” variant of the
   <code>~vector-append</code> pattern. The solutions are attempted starting with the ones maximizing
   the length of the rightmost segment, then the segment before it, etc.
@@ -756,30 +756,30 @@ converter pattern, or by using core patterns described further below.
 <p>
 A limited set of string patterns is provided. Advanced matching of strings
 can be performed either by combining list patterns with the <code>~list-&gt;string</code>
-converter pattern, or by using core patterns described further below. 
+converter pattern, or by using core patterns described further below.
 </p>
 
 <p>
   <code>(<b>~string</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~string</code> pattern matches a string with as many characters
-  as there are sub-patterns ⟨<i>mp</i> ⟩ … The characters 
-  should match the corresponding patterns. 
+  as there are sub-patterns ⟨<i>mp</i> ⟩ … The characters
+  should match the corresponding patterns.
 </p>
 
 <p>
   <code>(<b>~string-append</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern (iterative, greedy)</i><br>  
+    &nbsp;&nbsp;<i>match pattern (iterative, greedy)</i><br>
   The <code>~string-append</code> pattern matches a string, breaking it into
-  sub-string segments that can match the corresponding patterns 
+  sub-string segments that can match the corresponding patterns
   ⟨<i>mp</i> ⟩ … <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;This is an iterative pattern; the “solutions” are attempted starting 
+  &nbsp;&nbsp;&nbsp;&nbsp;This is an iterative pattern; the “solutions” are attempted starting
   with ones maximizing the length of the leftmost segment, then the segment after it, etc.
 </p>
 
 <p>
   <code>(<b>~string-append/ng</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern (iterative, non-greedy)</i><br>  
+    &nbsp;&nbsp;<i>match pattern (iterative, non-greedy)</i><br>
   The <code>~string-append/ng</code> pattern is a “non-greedy” variant of the
   <code>~string-append</code> pattern. The solutions are attempted starting with the ones maximizing
   the length of the rightmost segment, then the segment before it, etc.
@@ -789,78 +789,78 @@ converter pattern, or by using core patterns described further below.
 
 <p>
 These patterns extend the functionality of the matcher, allowing it to deal with
-numbers and symbols as strings, strings and chars as numbers, etc. They are named 
-as the corresponding constructors, so they match the types of objects on the right-hand 
+numbers and symbols as strings, strings and chars as numbers, etc. They are named
+as the corresponding constructors, so they match the types of objects on the right-hand
 side of <code>-&gt;</code>, e.g. <code>~list-&gt;vector</code> matches vectors, but
-applies its sub-pattern to the result of converting it to the list. They should be read 
+applies its sub-pattern to the result of converting it to the list. They should be read
 as converters for the <i>patterns</i> : <code>~list-&gt;vector</code> makes
 a vector pattern from a list pattern, and so on.
 </p>
 
 <p>
   <code>(<b>~vector-&gt;list</b></code> ⟨<i>mp</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~string-&gt;list</b></code> ⟨<i>mp</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~list-&gt;vector</b></code> ⟨<i>mp</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~list-&gt;string</b></code> ⟨<i>mp</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~string-&gt;symbol</b></code> ⟨<i>mp</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~symbol-&gt;string</b></code> ⟨<i>mp</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   Convert a pattern built to match objects of the type on the left side of <code>-&gt;</code>
   to the pattern able to match objects of the type on the right side of <code>-&gt;</code>,
   applying the “reverse” converter function internally. E.g. if ⟨<i>mp</i> ⟩
   can match lists of characters, <code>(<b>~list-&gt;string</b></code> ⟨<i>mp</i> ⟩<code>)</code>
-  will be able to match strings containing the same characters.   
+  will be able to match strings containing the same characters.
 </p>
 
 <p>
   <code>(<b>~string-&gt;number</b></code> ⟨<i>mp</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~string-&gt;number</b></code> ⟨<i>mp</i> ⟩ ⟨<i>rx</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
     <code>(<b>~number-&gt;string</b></code> ⟨<i>mp</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~number-&gt;string</b></code> ⟨<i>mp</i> ⟩ ⟨<i>rx</i> ⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
-  These patterns convert between number and string patterns, accepting an optional 
+    &nbsp;&nbsp;<i>match pattern</i><br>
+  These patterns convert between number and string patterns, accepting an optional
   ⟨<i>rx</i> ⟩ argument. This additional argument is an expression that is evaluated
   when the pattern is applied, and should produce a radix, suitable for Scheme
-  <code>string-&gt;number</code> / <code>number-&gt;string</code> procedures.  
+  <code>string-&gt;number</code> / <code>number-&gt;string</code> procedures.
 </p>
 
 <h3 id="specification">Predicate patterns</h3>
 
 <p>
-The role of predicate patterns is to “guard” their optional sub-patterns, making sure 
-that the input object belongs to a certain Scheme type. Their set is limited, but new 
+The role of predicate patterns is to “guard” their optional sub-patterns, making sure
+that the input object belongs to a certain Scheme type. Their set is limited, but new
 ones can be easily defined, as explained in the section on derived patterns below.
 </p>
 
 <p>
   <code>(<b>~null?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~pair?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~list?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~boolean?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~number?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~integer?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~vector?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~string?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~symbol?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   <code>(<b>~char?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
 These patterns match if the input object satisfies the like-named Scheme predicate, and
 if there are sub-patterns, <em>all</em> sub-patterns match the same input object, as if
 combined with the <code>~and</code> pattern combinator (see below).
@@ -869,15 +869,15 @@ combined with the <code>~and</code> pattern combinator (see below).
 <h3 id="specification">Logical patterns</h3>
 
 <p>
-These patterns apply their sub-patterns to the same input object, combining the 
-results of individual sub-pattern matches.  
+These patterns apply their sub-patterns to the same input object, combining the
+results of individual sub-pattern matches.
 </p>
 
 <p>
   <code>(<b>~and</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
     &nbsp;&nbsp;<i>match pattern</i><br>
-This pattern matches if <em>all</em> its sub-patterns match the input object. If 
-sub-patterns contain pattern values, all of them are bound on a successful match. If there 
+This pattern matches if <em>all</em> its sub-patterns match the input object. If
+sub-patterns contain pattern values, all of them are bound on a successful match. If there
 are no sub-patterns, the <code>(~and)</code> pattern matches any object.
 </p>
 
@@ -886,20 +886,20 @@ are no sub-patterns, the <code>(~and)</code> pattern matches any object.
     &nbsp;&nbsp;<i>match pattern (iterative)</i><br>
 This pattern matches if <em>any</em> of its sub-patterns matches the input object. The
 sub-patterns are tried in the order they are written, and the process stops on
-the first sub-pattern that matches successfully (but see the note below). If sub-patterns 
-contain pattern values, all of them are bound on a match, but only the ones 
-belonging to the “successful” sub-pattern will have their values bound to the 
-corresponding sub-values. The remaining variables are bound to <code>#f</code>. 
+the first sub-pattern that matches successfully (but see the note below). If sub-patterns
+contain pattern values, all of them are bound on a match, but only the ones
+belonging to the “successful” sub-pattern will have their values bound to the
+corresponding sub-values. The remaining variables are bound to <code>#f</code>.
 If there are no sub-patterns, the <code>(~or)</code> pattern fails on every object.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  this pattern is iterative in the following 
-sense: if backtracking exausts all possible match solutions for one sub-pattern, the next 
-one is tried, then the next one etc.   
+&nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  this pattern is iterative in the following
+sense: if backtracking exausts all possible match solutions for one sub-pattern, the next
+one is tried, then the next one etc.
 </p>
 
 <p>
   <code>(<b>~not</b></code> ⟨<i>mp</i> ⟩<code>)</code>
     &nbsp;&nbsp;<i>match pattern</i><br>
-This pattern matches if its sub-pattern fails to match the input object. If 
+This pattern matches if its sub-pattern fails to match the input object. If
 it contains pattern variables, none of them are bound on a successful match
 (i.e. when the sub-pattern fails).
 </p>
@@ -912,144 +912,144 @@ it contains pattern variables, none of them are bound on a successful match
 
 <p>
   <code>(<b>~list*</b></code> ⟨<i>mp</i> ⟩ … ⟨<i>mp</i> <sub>t</sub>⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~list*</code> pattern matches a (possibly improper) list with at least as many elements
-  as there are sub-patterns ⟨<i>mp</i> ⟩ … The elements 
+  as there are sub-patterns ⟨<i>mp</i> ⟩ … The elements
   should match the corresponding patterns; the remaining part of the list should match the
-  last pattern, ⟨<i>mp</i> <sub>t</sub>⟩. 
+  last pattern, ⟨<i>mp</i> <sub>t</sub>⟩.
 </p>
 
 <p>
   <code>(<b>~list-no-order</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   This pattern matches a proper list with as many elements
   as there are sub-patterns ⟨<i>mp</i> ⟩ … It iterates through
   all possible permutations of the input list looking for one with elements that
-  match the corresponding sub-patterns. 
+  match the corresponding sub-patterns.
 </p>
 
 <p>
   <code>(<b>~list-no-order*</b></code> ⟨<i>mp</i> ⟩ … ⟨<i>mp</i> <sub>t</sub>⟩<code>)</code>
-    &nbsp;&nbsp;<i>match pattern</i><br>  
+    &nbsp;&nbsp;<i>match pattern</i><br>
   This pattern matches a (possibly improper) list with at least as many elements
-  as there are sub-patterns ⟨<i>mp</i> ⟩ … The elements, 
-  in some permutation of the original order, should match the corresponding patterns; 
+  as there are sub-patterns ⟨<i>mp</i> ⟩ … The elements,
+  in some permutation of the original order, should match the corresponding patterns;
   the remaining part of the list should match the
-  last pattern, ⟨<i>mp</i> <sub>t</sub>⟩. 
+  last pattern, ⟨<i>mp</i> <sub>t</sub>⟩.
 </p>
 
 <p>
-  <code>(<b>~=</b></code> ⟨<i>fn</i> ⟩ 
+  <code>(<b>~=</b></code> ⟨<i>fn</i> ⟩
   ⟨<i>mp</i> ⟩<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
-In this pattern, ⟨<i>fn</i> ⟩ is not a pattern. The pattern 
-binds its input value to a fresh variable ⟨<i>iv</i> ⟩, 
-and then evaluates the <code>(</code>⟨<i>fn</i> ⟩ 
-⟨<i>iv</i> ⟩<code>)</code> expression; its result is matched 
+In this pattern, ⟨<i>fn</i> ⟩ is not a pattern. The pattern
+binds its input value to a fresh variable ⟨<i>iv</i> ⟩,
+and then evaluates the <code>(</code>⟨<i>fn</i> ⟩
+⟨<i>iv</i> ⟩<code>)</code> expression; its result is matched
 against the ⟨<i>mp</i> ⟩ sub-pattern.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  ⟨<i>fn</i> ⟩ does not have
-to name a function, it can be of any form. The combined expression is evaluated 
+to name a function, it can be of any form. The combined expression is evaluated
 as-is so the matching process may be interrupted in case of errors.
 </p>
 
 <p>
-  <code>(<b>~?</b></code> ⟨<i>fn</i> ⟩ 
+  <code>(<b>~?</b></code> ⟨<i>fn</i> ⟩
   ⟨<i>mp</i> ⟩ …<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
-In this pattern, ⟨<i>fn</i> ⟩ is not a pattern. The pattern binds its 
-input value to a fresh variable ⟨<i>iv</i> ⟩, 
-and evaluates the <code>(</code>⟨<i>fn</i> ⟩ 
-⟨<i>iv</i> ⟩<code>)</code> expression. If the expression evaluates 
+In this pattern, ⟨<i>fn</i> ⟩ is not a pattern. The pattern binds its
+input value to a fresh variable ⟨<i>iv</i> ⟩,
+and evaluates the <code>(</code>⟨<i>fn</i> ⟩
+⟨<i>iv</i> ⟩<code>)</code> expression. If the expression evaluates
 to <code>#f</code>, the pattern fails. Otherwise, the input object is matched
 against ⟨<i>mp</i> ⟩… sub-patterns, combined via
 <code>~and</code> (i.e. all of them should match).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  ⟨<i>fn</i> ⟩ does not have
-to name a function, it can be of any form. The expression is evaluated 
+to name a function, it can be of any form. The expression is evaluated
 as-is, so the matching process may be interrupted in case of errors.
 </p>
 
 <h3 id="specification">Core patterns</h3>
 
 <p>
-These patterns may not be as compact, nor as convenient to use as the ones described above, 
+These patterns may not be as compact, nor as convenient to use as the ones described above,
 but they provide functionality needed to build derived patterns via <code>define-match-pattern</code>
-(see below). In fact, all patterns described above except for <code>~etc</code>, basic and logical ones are implementable 
+(see below). In fact, all patterns described above except for <code>~etc</code>, basic and logical ones are implementable
 in this way; some of the possible derivations are shown in the Appendix.
 </p>
 
 <p>
-  <code>(<b>~prop</b></code> ⟨<i>fn</i> ⟩ 
+  <code>(<b>~prop</b></code> ⟨<i>fn</i> ⟩
   <code>=&gt;</code> ⟨<i>mp</i> ⟩ …<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
-  <code>(<b>~prop</b></code> ⟨<i>fn</i> ⟩ 
+  <code>(<b>~prop</b></code> ⟨<i>fn</i> ⟩
   <code>(</code>⟨<i>arg</i> ⟩ …<code>)</code>
   <code>=&gt;</code> ⟨<i>mp</i> ⟩ …<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
-In this pattern, ⟨<i>fn</i> ⟩ and all ⟨<i>arg</i> ⟩s 
-are not patterns. The pattern binds its input value to a fresh variable ⟨<i>iv</i> ⟩, 
-and then evaluates the <code>(</code>⟨<i>fn</i> ⟩ ⟨<i>iv</i> ⟩ 
+In this pattern, ⟨<i>fn</i> ⟩ and all ⟨<i>arg</i> ⟩s
+are not patterns. The pattern binds its input value to a fresh variable ⟨<i>iv</i> ⟩,
+and then evaluates the <code>(</code>⟨<i>fn</i> ⟩ ⟨<i>iv</i> ⟩
 ⟨<i>arg</i> ⟩…<code>)</code> expression; its results are matched against the
 ⟨<i>mp</i> ⟩ … sub-patterns.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  ⟨<i>fn</i> ⟩ does not have
-to name a function, it can be of any form. The combined expression is evaluated 
+to name a function, it can be of any form. The combined expression is evaluated
 as-is, so the matching process may be interrupted in case of errors.
 </p>
 
 <p>
   <code>(<b>~test</b></code> ⟨<i>fn</i> ⟩<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
-  <code>(<b>~test</b></code> ⟨<i>fn</i> ⟩ 
+  <code>(<b>~test</b></code> ⟨<i>fn</i> ⟩
   <code>(</code>⟨<i>arg</i> ⟩ …<code>))</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
-  <code>(<b>~test</b></code> ⟨<i>fn</i> ⟩ 
+  <code>(<b>~test</b></code> ⟨<i>fn</i> ⟩
   <code>=&gt;</code> ⟨<i>mp</i> ⟩<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
-  <code>(<b>~test</b></code> ⟨<i>fn</i> ⟩ 
+  <code>(<b>~test</b></code> ⟨<i>fn</i> ⟩
   <code>(</code>⟨<i>arg</i> ⟩ …<code>)</code>
   <code>=&gt;</code> ⟨<i>mp</i> ⟩<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
-In this pattern, ⟨<i>fn</i> ⟩ and all ⟨<i>arg</i> ⟩s 
-are not patterns. The pattern binds its input value to a fresh variable ⟨<i>iv</i> ⟩, 
-and evaluates the <code>(</code>⟨<i>fn</i> ⟩ ⟨<i>iv</i> ⟩ 
-⟨<i>arg</i> ⟩…<code>)</code> expression. If the expression evaluates to <code>#f</code>, 
+In this pattern, ⟨<i>fn</i> ⟩ and all ⟨<i>arg</i> ⟩s
+are not patterns. The pattern binds its input value to a fresh variable ⟨<i>iv</i> ⟩,
+and evaluates the <code>(</code>⟨<i>fn</i> ⟩ ⟨<i>iv</i> ⟩
+⟨<i>arg</i> ⟩…<code>)</code> expression. If the expression evaluates to <code>#f</code>,
 the pattern fails. Otherwise, if ⟨<i>mp</i> ⟩
 sub-pattern is present, it should also match the result; if it is absent, the match just
 succeeds.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  ⟨<i>fn</i> ⟩ does not have
-to name a function, it can be of any form. The expression is evaluated 
+to name a function, it can be of any form. The expression is evaluated
 as-is, so the matching process may be interrupted in case of errors.
 </p>
 
 <p>
   <code>(<b>~iterate</b></code> ⟨<i>start</i> ⟩
-  ⟨<i>head</i> ⟩ ⟨<i>tail</i> ⟩ 
+  ⟨<i>head</i> ⟩ ⟨<i>tail</i> ⟩
   <code>(</code>⟨<i>var</i> ⟩…<code>)</code>
   ⟨<i>mp</i> ⟩<code>)</code> &nbsp;&nbsp;<i>match pattern</i><br>
   This pattern combinator builds a backtracking matcher
-  that produces a stream of “solutions” to be matched against 
+  that produces a stream of “solutions” to be matched against
   ⟨<i>mp</i> ⟩; ⟨<i>start</i> ⟩,
   ⟨<i>head</i> ⟩, ⟨<i>tail</i> ⟩,
   and all ⟨<i>var</i> ⟩s are not patterns. Internally,
-  it uses an iterative loop with ⟨<i>var</i> ⟩… 
-  serving is a list of state variables (their names should be different, 
-  but otherwise unimportant due to hygiene). The rest of the non-pattern 
-  arguments are used to form internal expressions and can be either names 
+  it uses an iterative loop with ⟨<i>var</i> ⟩…
+  serving is a list of state variables (their names should be different,
+  but otherwise unimportant due to hygiene). The rest of the non-pattern
+  arguments are used to form internal expressions and can be either names
   of procedures or macros. They are used as follows:<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;⟨<i>start</i> ⟩ is invoked 
+  &nbsp;&nbsp;&nbsp;&nbsp;⟨<i>start</i> ⟩ is invoked
   with the original value and two continuation procedures:
-  first one (<i>try</i> ) accepts 'seed' values for state variables 
-  if start succeeds, the second one (<i>fail</i> ) accepts no values 
+  first one (<i>try</i> ) accepts 'seed' values for state variables
+  if start succeeds, the second one (<i>fail</i> ) accepts no values
   and is called if start fails.<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;⟨<i>head</i> ⟩ accepts current 
+  &nbsp;&nbsp;&nbsp;&nbsp;⟨<i>head</i> ⟩ accepts current
   values of state variables and returns a single value to be matched against
   ⟨<i>mp</i> ⟩ pattern.<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;⟨<i>tail</i> ⟩ accepts the 
+  &nbsp;&nbsp;&nbsp;&nbsp;⟨<i>tail</i> ⟩ accepts the
   same two continuations as ⟨<i>start</i> ⟩, followed by
   the current values of state variables. It should either apply its
-  <i>try</i>  continuation to continue with new values of state vars, 
+  <i>try</i>  continuation to continue with new values of state vars,
   or apply its <i>fail</i>  one to signal that there are no more “solutions”.<br>
   &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  both <i>try</i>  and
-  <i>fail</i>  should be applied in tail positions.   
+  <i>fail</i>  should be applied in tail positions.
 </p>
 
 <!-- p>
@@ -1057,7 +1057,7 @@ as-is, so the matching process may be interrupted in case of errors.
   &nbsp;&nbsp;<i>match pattern</i><br/>
 This pattern, pronounced as “cut!”, should be familiar to Prolog programmers.
 It provides a degree of control for iterative behavior of its sub-pattern,
-&langle;<i>mp</i>&thinsp;&rangle;. It re-arranges the control in 
+&langle;<i>mp</i>&thinsp;&rangle;. It re-arranges the control in
 such a way, that when the first “solution” for its sub-pattern is found,
 it is taken as the only one, and the sub-pattern is never re-tried unless
 the whole <code>~!</code> pattern is re-tried.
@@ -1073,17 +1073,17 @@ the pattern combinators below.
 
 <p>
   <code>(<b>~if-id-member</b></code> ⟨<i>id</i> ⟩
-  <code>(</code> ⟨<i>literal-id</i> ⟩ …<code>)</code> 
+  <code>(</code> ⟨<i>literal-id</i> ⟩ …<code>)</code>
   ⟨<i>mp</i> <sub>t</sub>⟩ ⟨<i>mp</i> <sub>f</sub>⟩<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
-This pattern selects one of the two sub-pattern arguments based on the first two 
+This pattern selects one of the two sub-pattern arguments based on the first two
 non-pattern arguments. The ⟨<i>id</i> ⟩ argument is a match
-pattern identifier, but it is not used as a sub-pattern. The second argument is a list 
+pattern identifier, but it is not used as a sub-pattern. The second argument is a list
 of distinct match pattern identifiers; they are also not used as sub-patterns.
 The <code>~if-id-member</code> checks if ⟨<i>id</i> ⟩ is
-in the list of ⟨<i>literal-id</i> ⟩s, selecting the 
+in the list of ⟨<i>literal-id</i> ⟩s, selecting the
 first sub-pattern for matching if it is there, or the second sub-pattern if it's not.
-The method of comparison is the same as the one used to compare input identifiers 
+The method of comparison is the same as the one used to compare input identifiers
 with the list of literal identifiers in <code>syntax-rules</code>.
 </p>
 
@@ -1092,22 +1092,22 @@ with the list of literal identifiers in <code>syntax-rules</code>.
   ⟨<i>new _</i> ⟩  ⟨<i>mp</i> ⟩<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
 This pattern matches ⟨<i>mp</i> ⟩ after replacing all ellipsis
-(<code>...</code>) identifiers in it with ⟨<i>new ...</i> ⟩, and 
-all underscore (<code>_</code>) identifiers with ⟨<i>new _</i> ⟩. 
+(<code>...</code>) identifiers in it with ⟨<i>new ...</i> ⟩, and
+all underscore (<code>_</code>) identifiers with ⟨<i>new _</i> ⟩.
 This is useful if ⟨<i>mp</i> ⟩ incorporates patterns designed to
-use regular ellipsis and/or underscore as part of its syntax. Replacing them allows 
-pattern rewriting rules (see <code>define-match-pattern</code> below) to employ these 
+use regular ellipsis and/or underscore as part of its syntax. Replacing them allows
+pattern rewriting rules (see <code>define-match-pattern</code> below) to employ these
 identifiers in their special role, controlling the rewriting.
 </p>
 
 <h3 id="specification">Defining new patterns</h3>
 
 <p>
-New patterns can be defined using a pattern rewriting system, replicating the 
+New patterns can be defined using a pattern rewriting system, replicating the
 functionality of <code>syntax-rules</code>, but using patterns instead of regular
-Scheme expressions or definitions. It hides the details of the internal pattern 
-macroexpansion protocol, creating an illusion that patterns expand into 
-combinations of other patterns directly.   
+Scheme expressions or definitions. It hides the details of the internal pattern
+macroexpansion protocol, creating an illusion that patterns expand into
+combinations of other patterns directly.
 </p>
 
 <p>
@@ -1115,22 +1115,22 @@ combinations of other patterns directly.
   <code>(</code>⟨<i>literal-id</i> ⟩ …<code>)</code>
   <code>(</code>⟨<i>imp</i> ⟩ ⟨<i>omp</i> ⟩<code>)</code> …
   <code>)</code>
-  &nbsp;&nbsp;<i>syntax</i><br> 
+  &nbsp;&nbsp;<i>syntax</i><br>
   This form expands into an equivalent of<br><br>
-   <code>(define-syntax</code> ⟨<i>name</i> ⟩ 
-   <code>(syntax-rules (</code>⟨<i>literal-id</i> ⟩ …<code>)</code> 
+   <code>(define-syntax</code> ⟨<i>name</i> ⟩
+   <code>(syntax-rules (</code>⟨<i>literal-id</i> ⟩ …<code>)</code>
     ⟨<i>rule</i> ⟩ …<code>))</code><br><br>
-  where ⟨<i>name</i> ⟩ is a new match pattern name, and each 
-  ⟨<i>rule</i> ⟩ is a <code>syntax-rules</code> transformation rule, 
+  where ⟨<i>name</i> ⟩ is a new match pattern name, and each
+  ⟨<i>rule</i> ⟩ is a <code>syntax-rules</code> transformation rule,
   created from a pair of an input pattern ⟨<i>imp</i> ⟩
-  and the corresponding output pattern ⟨<i>omp</i> ⟩. Please see 
-  the description of <code>syntax-rules</code> for the details. 
+  and the corresponding output pattern ⟨<i>omp</i> ⟩. Please see
+  the description of <code>syntax-rules</code> for the details.
 </p>
 
-<p> 
-To show how it works in practice, here's a definition of a <code>~qq</code> pattern, 
+<p>
+To show how it works in practice, here's a definition of a <code>~qq</code> pattern,
 equivalent to the built-in <code>quasiquote</code> pattern; it implements the T[ ] transcription
-function. More examples are available 
+function. More examples are available
 in the Examples section and in the Appendix below. </p>
 
 <pre><code>(<b>define-match-pattern</b> ~qq (unquote unquote-splicing)
@@ -1141,44 +1141,44 @@ in the Examples section and in the Appendix below. </p>
   [(_ #(p ...))    (~vector (~qq p) ...)]
   [(_ a)           (quote a)])
 
-(<b>match</b> '(1 (2 . 3) #(4)) 
-  [(~qq (,x (,y . ,z) #(,t))) 
+(<b>match</b> '(1 (2 . 3) #(4))
+  [(~qq (,x (,y . ,z) #(,t)))
        `(,x (,y . ,z) #(,t))])
 ⟹ (1 (2 . 3) #(4))
-</code></pre>  
+</code></pre>
 
 <h3 id="templates">Elements of templating</h3>
 
 <p>
 Although the bulk of this proposal is dedicated to patterns, there are a few things
-that can be done to simplify the templating too. There is some symmetry between the 
-pattern language and the regular Scheme expressions, which in many cases allows one 
-to re-create the input object by constructing it back in the same way it was 
+that can be done to simplify the templating too. There is some symmetry between the
+pattern language and the regular Scheme expressions, which in many cases allows one
+to re-create the input object by constructing it back in the same way it was
 taken apart, e.g.:
 </p>
 
-<pre><code>(<b>match</b> '(1 (2 . 3) #(4)) 
-  [(~list x (~cons y z) (~vector t)) 
+<pre><code>(<b>match</b> '(1 (2 . 3) #(4))
+  [(~list x (~cons y z) (~vector t))
     (list x  (cons y z)  (vector t))])
 ⟹ (1 (2 . 3) #(4))
 
-(<b>match</b> '(1 (2 . 3) #(4)) 
-  [`(,x (,y . ,z) #(,t)) 
+(<b>match</b> '(1 (2 . 3) #(4))
+  [`(,x (,y . ,z) #(,t))
    `(,x (,y . ,z) #(,t))])
 ⟹ (1 (2 . 3) #(4))
 </code></pre>
 
 <p>
-Things get more complicated when one has to deal with “ellipsis” expressions. To 
-re-construct them, one has to use <code>map</code> with a <code>lambda</code>-expression 
-containing the element construction code. To simplify this process, two extra syntax forms are provided.  
+Things get more complicated when one has to deal with “ellipsis” expressions. To
+re-construct them, one has to use <code>map</code> with a <code>lambda</code>-expression
+containing the element construction code. To simplify this process, two extra syntax forms are provided.
 </p>
 
 <p>
   <code>(<b>value</b></code> ⟨<i>expression</i> ⟩<code>)</code>
   &nbsp;&nbsp;<i>procedure or syntax</i><br>
-This form just evaluates ⟨<i>expression</i> ⟩ and returns its 
-value, complementing the <code>~value</code> pattern. It is also the only form other 
+This form just evaluates ⟨<i>expression</i> ⟩ and returns its
+value, complementing the <code>~value</code> pattern. It is also the only form other
 than <code>quote</code>, recognized by name by the <code>etc</code> syntax form:
 </p>
 
@@ -1188,27 +1188,27 @@ than <code>quote</code>, recognized by name by the <code>etc</code> syntax form:
 This form may help in shortening the construction code needed to combine lists
 produced by a successful <code>~etc</code> pattern. The ⟨<i>constructor</i> ⟩
 argument is a limited form of expression: it is either an ⟨<i>atomic datum</i> ⟩,
-an identifier, a quoted S-expression (a two element list starting with <code>quote</code>), 
-a <code>value</code> expression (see above), or an application or macro use in a form of a list that 
-starts with an identifier, followed by zero or more ⟨<i>constructor</i> ⟩s. <br>  
-&nbsp;&nbsp;&nbsp;&nbsp;The <code>etc</code> form is expanded as follows: first, it is 
+an identifier, a quoted S-expression (a two element list starting with <code>quote</code>),
+a <code>value</code> expression (see above), or an application or macro use in a form of a list that
+starts with an identifier, followed by zero or more ⟨<i>constructor</i> ⟩s. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;The <code>etc</code> form is expanded as follows: first, it is
 scanned for variables (it collects all identifiers outside of <code>quote</code> and <code>value</code>
-forms, not used as head identifiers of an application or macro use). Then, a <code>map</code> application 
-is built, with <code>lambda</code> form with the collected variables as formal parameters 
-and the ⟨<i>constructor</i> ⟩ as its body, followed by the same 
+forms, not used as head identifiers of an application or macro use). Then, a <code>map</code> application
+is built, with <code>lambda</code> form with the collected variables as formal parameters
+and the ⟨<i>constructor</i> ⟩ as its body, followed by the same
 variables as the lists for <code>map</code> to process. The variables do not have to be
 taken from patterns, they can come from any place in the current context; all decisions on
 which variables are unrolled and which are replicated are explicit.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Uses of the <code>etc</code> form can be nested: 
+&nbsp;&nbsp;&nbsp;&nbsp;Uses of the <code>etc</code> form can be nested:
 </p>
 
 <code><pre>(<b>match</b> '((0) (1 2) (3 4 5) (6 7 8 9))
-  [(~etc (~cons x (~etc y*))) 
+  [(~etc (~cons x (~etc y*)))
     (etc  (cons x  (etc y*)))])
 ⟹ ((0) (1 2) (3 4 5) (6 7 8 9))
 
 (<b>match</b> '((0) (1 2) (3 4 5) (6 7 8 9))
-  [(~etc (~cons x (~etc y*))) 
+  [(~etc (~cons x (~etc y*)))
    (cons (etc x) (etc y*))])
 ⟹ ((0 1 3 6) () (2) (4 5) (7 8 9))
 
@@ -1219,16 +1219,16 @@ which variables are unrolled and which are replicated are explicit.<br>
 <h3 id="specification">Derived pattern types</h3>
 
 <p>
-This appendix gives possible definitions for some derived pattern types in terms of 
+This appendix gives possible definitions for some derived pattern types in terms of
 the basic and core pattern types.
 </p>
 
-<pre><code>(<b>define-match-pattern</b> ~value () 
-  [(_ e) 
+<pre><code>(<b>define-match-pattern</b> ~value ()
+  [(_ e)
    (~test equal? (e))])
 
-(<b>define-match-pattern</b> ~cons () 
-  [(_ ap dp) 
+(<b>define-match-pattern</b> ~cons ()
+  [(_ ap dp)
    (~and (~test pair?) (~prop car =&gt; ap) (~prop cdr =&gt; dp))])
 
 (<b>define-match-pattern</b> ~list ()
@@ -1240,49 +1240,49 @@ the basic and core pattern types.
   [(~list* p . p*) (~cons p (~list* . p*))])
 
 (<b>define-syntax</b> match:cno-start
-  (<b>syntax-rules</b> () 
-    [(_ xv try f) 
+  (<b>syntax-rules</b> ()
+    [(_ xv try f)
      (<b>if</b> (pair? xv) (try '() xv) (f))]))
 
 (<b>define-syntax</b> match:cno-head
-  (<b>syntax-rules</b> () 
-    [(_ h t) 
+  (<b>syntax-rules</b> ()
+    [(_ h t)
      (cons (car t) (append h (cdr t)))]))
 
 (<b>define-syntax</b> match:cno-tail
-  (<b>syntax-rules</b> () 
-    [(_ try f h t) 
+  (<b>syntax-rules</b> ()
+    [(_ try f h t)
      (<b>if</b> (pair? (cdr t)) (try (cons (car t) h) (cdr t)) (f))]))
 
 (<b>define-match-pattern</b> ~cons-no-order ()
   [(~cons-no-order pe pr)
-   (~iterate match:cno-start match:cno-head match:cno-tail (h t) 
+   (~iterate match:cno-start match:cno-head match:cno-tail (h t)
      (~cons pe pr))])
 
 (<b>define-match-pattern</b> ~list-no-order ()
   [(~list-no-order) '()]
   [(~list-no-order p) (~list p)]
-  [(~list-no-order p . p*) 
+  [(~list-no-order p . p*)
    (~cons-no-order p (~list-no-order . p*))])
 
 (<b>define-match-pattern</b> ~list-no-order* ()
   [(~list-no-order* p) p]
-  [(~list-no-order* p . p*) 
+  [(~list-no-order* p . p*)
    (~cons-no-order p (~list-no-order* . p*))])
 
-(<b>define-match-pattern</b> ~vector? () 
-  [(_ p ...) 
+(<b>define-match-pattern</b> ~vector? ()
+  [(_ p ...)
    (~and (~test vector?)  p ...)])
 
-(<b>define-match-pattern</b> ~vector-&gt;list () 
+(<b>define-match-pattern</b> ~vector-&gt;list ()
   [(_ p)
    (~and (~test list?) (~prop list-&gt;vector =&gt; p))])
 
-(<b>define-match-pattern</b> ~vector () 
-  [(_ p ...) 
+(<b>define-match-pattern</b> ~vector ()
+  [(_ p ...)
    (~and (~test vector?) (~prop vector-&gt;list =&gt; (~list p ...)))])
 
-(<b>define-match-pattern</b> ~number-&gt;string () 
+(<b>define-match-pattern</b> ~number-&gt;string ()
   [(_ p)
    (~and (~test string?) (~prop string-&gt;number =&gt; p))]
   [(_ p rx)
@@ -1308,8 +1308,8 @@ It runs on many R6RS and R7RS and some R5RS Schemes.
 <h2 id="acknowledgements">Acknowledgements</h2>
 
 <p>
-This proposal is both based on and inspired by the work of the following people: 
-Andrew K. Wright, Robert Cartwright, Alex Shinn, R. Kent Dybvig, Dan Friedman, Erik Hilsdale, 
+This proposal is both based on and inspired by the work of the following people:
+Andrew K. Wright, Robert Cartwright, Alex Shinn, R. Kent Dybvig, Dan Friedman, Erik Hilsdale,
 Chris Hanson, Gerald Jay Sussman, Marc Nieper-Wißkirchen, Dimitris Vyzovitis, and Panicz Maciej Godek.
 I am grateful to Andrew Pochinsky and Daphne Preston-Kendal for their feedback.
 </p>
