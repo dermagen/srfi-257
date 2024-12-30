@@ -25,9 +25,49 @@ SPDX-License-Identifier: MIT
 
 <p style="color: red;">For editor's use only.  Please do not edit this section.</p>
 
-<p>??? the draft/final/withdrawn status of the SRFI, information on how
-to subscribe to its mailing list, and important dates in its history.
-The editor will add this section.</p>
+<h2 id="toc">Table of contents</h2>
+<ul>
+  <li><a href="#rationale">Rationale</a></li>
+  <li>
+    <a href="#examples">Examples</a>
+    <ul>
+      <li><a href="#srfi-204-examples">SRFI-204 Examples</a></li>
+      <li>
+        <a href="#advanced-examples">Advanced Examples</a>
+        <ul>
+          <li><a href="#backtracking">Backtracking</a></li>
+          <li><a href="#custom-match-forms">Custom match forms</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <a href="#specification">Specification</a>
+    <ul>
+      <li><a href="#basic-patterns">Basic patterns</a></li>
+      <li><a href="#value-pattern">The Value pattern</a></li>
+      <li><a href="#list-patterns">List patterns</a></li>
+      <li><a href="#vector-patterns">Vector patterns</a></li>
+      <li><a href="#string-patterns">String patterns</a></li>
+      <li><a href="#conversion-patterns">Conversion patterns</a></li>
+      <li><a href="#predicate-patterns">Predicate patterns</a></li>
+      <li><a href="#logical-patterns">Logical patterns</a></li>
+      <li><a href="#compatibility-patterns">Compatibility patterns</a></li>
+      <li><a href="#core-patterns">Core patterns</a></li>
+      <li><a href="#pattern-language-construction-patterns">Pattern language construction patterns</a></li>
+      <li><a href="#defining-new-patterns">Defining new patterns</a></li>
+      <li><a href="#elements-of-templating">Elements of templating</a></li>
+    </ul>
+  </li>
+  <li>
+    <a href="#appendix">Appendix</a>
+    <ul>
+      <li><a href="#derived-pattern-types">Derived pattern types</a></li>
+    </ul>
+  </li>
+  <li><a href="#implementation">Implementation</a></li>
+  <li><a href="#acknowledgements">Acknowledgements</a></li>
+</ul>
 
 <h2 id="abstract">Abstract</h2>
 
@@ -86,7 +126,7 @@ mechanism for pattern rewriting.
 
 <h2 id="examples">Examples</h2>
 
-<h3 id="examples204">SRFI-204 Examples</h3>
+<h3 id="srfi-204-examples">SRFI-204 Examples</h3>
 
 <p>
 The examples below are taken from <a href="https://srfi.schemers.org/srfi-204/">SRFI-204</a>
@@ -258,7 +298,7 @@ An analog of WSM <code>**1</code> can be defined as follows: </p> <pre><code>(<b
   [(~etc (~or 2 6 rest)) rest])
 ⟹ (0 1 #f 3 4 5 #f 7)
 
-</code></pre> <p>Single-argument <core>~not</core> patterns are supported.
+</code></pre> <p>Single-argument <code>~not</code> patterns are supported.
 It is an error for a pattern to refer to the same variable inside and outside of a <code>~not</code> pattern. </p> <pre><code>(<b>match</b> 1 [(~and x (~not #f)) x] [_ 'fail]) ⟹ 1
 (<b>match</b> #f [(~and x (~not #f)) x] [_ 'fail]) ⟹ fail
 (<b>match</b> 1 [(~not 2) #t]) ⟹ #t
@@ -288,13 +328,13 @@ in the body of the corresponding rule:
 
 </code></pre>
 
-<h3 id="examplesadv">Advanced Examples</h3>
+<h3 id="advanced-examples">Advanced Examples</h3>
 
 <p>
 This section contains examples specific to new functionality proposed in this SRFI.
 </p>
 
-<h4 id="examplesbt">Backtracking</h4>
+<h4 id="backtracking">Backtracking</h4>
 
 <p>
 Some patterns marked as “iterative” in this proposal may match the input object
@@ -349,7 +389,7 @@ point or next rule if none left: </p>
 ⟹ "1:ab+c+;1:a+b+c;1:+a+bc;2:abc+;2:ab+c;2:a+bc;2:+abc;"
 </code></pre>
 
-<h4 id="examplescm">Custom match forms</h4>
+<h4 id="custom-match-forms">Custom match forms</h4>
 
 <p>
 It is relatively easy to define custom match forms with a different pattern grammar
@@ -572,7 +612,7 @@ nested, the matcher acts as if the outer pattern has full control over the decom
 allowing its immediate sub-patterns to work with the parts in the order the outer pattern supplies them.
 </p>
 
-<h3 id="specification">Basic patterns</h3>
+<h3 id="basic-patterns">Basic patterns</h3>
 
 <p>
 ⟨<i>atomic datum</i> ⟩ &nbsp;&nbsp;<i>match pattern</i><br>
@@ -633,7 +673,7 @@ abbreviated form, first matching rule is chosen):
       T[⟨<i>mqp</i> <sub>1</sub>⟩]*<code>)</code></td></tr>
 </tbody></table>
 
-<h3 id="specification">The Value pattern</h3>
+<h3 id="value-pattern">The Value pattern</h3>
 
 <p>
   <code>(<b>~value</b></code> ⟨<i>expression</i> ⟩<code>)</code>&nbsp;&nbsp;<i>match pattern</i><br>
@@ -644,7 +684,7 @@ abbreviated form, first matching rule is chosen):
 </p>
 
 
-<h3 id="specification">List patterns</h3>
+<h3 id="list-patterns">List patterns</h3>
 
 <p>List patterns match various types of pairs/lists, disassembling them into sub-expressions
 and applying to them sub-patterns. They are named to resemble the corresponding Scheme constructors,
@@ -720,7 +760,7 @@ The <code>~cons</code> pattern matches a pair whose <i>car</i>  matches
   by <code>~etc</code> pattern on a successful match.
 </p>
 
-<h3 id="specification">Vector patterns</h3>
+<h3 id="vector-patterns">Vector patterns</h3>
 
 <p>
 A limited set of vector patterns is provided. Advanced matching of vectors
@@ -755,7 +795,7 @@ converter pattern, or by using core patterns described further below.
   the length of the rightmost segment, then the segment before it, etc.
 </p>
 
-<h3 id="specification">String patterns</h3>
+<h3 id="string-patterns">String patterns</h3>
 
 <p>
 A limited set of string patterns is provided. Advanced matching of strings
@@ -789,7 +829,7 @@ converter pattern, or by using core patterns described further below.
   the length of the rightmost segment, then the segment before it, etc.
 </p>
 
-<h3 id="specification">Conversion patterns</h3>
+<h3 id="conversion-patterns">Conversion patterns</h3>
 
 <p>
 These patterns extend the functionality of the matcher, allowing it to deal with
@@ -836,7 +876,7 @@ a vector pattern from a list pattern, and so on.
   <code>string-&gt;number</code> / <code>number-&gt;string</code> procedures.
 </p>
 
-<h3 id="specification">Predicate patterns</h3>
+<h3 id="predicate-patterns">Predicate patterns</h3>
 
 <p>
 The role of predicate patterns is to “guard” their optional sub-patterns, making sure
@@ -870,7 +910,7 @@ if there are sub-patterns, <em>all</em> sub-patterns match the same input object
 combined with the <code>~and</code> pattern combinator (see below).
 </p>
 
-<h3 id="specification">Logical patterns</h3>
+<h3 id="logical-patterns">Logical patterns</h3>
 
 <p>
 These patterns apply their sub-patterns to the same input object, combining the
@@ -908,7 +948,7 @@ it contains pattern variables, none of them are bound on a successful match
 (i.e. when the sub-pattern fails).
 </p>
 
-<h3 id="specification">Compatibility patterns</h3>
+<h3 id="compatibility-patterns">Compatibility patterns</h3>
 
 <p>
   These patterns provide functionality popularized by the “Wright-style” family of matchers.
@@ -972,7 +1012,7 @@ to name a function; it can be of any form. The expression is evaluated
 as is, so the matching process may be interrupted in case of errors.
 </p>
 
-<h3 id="specification">Core patterns</h3>
+<h3 id="core-patterns">Core patterns</h3>
 
 <p>
 These patterns may not be as compact, nor as convenient to use as the ones described above,
@@ -1067,7 +1107,7 @@ it is taken as the only one, and the sub-pattern is never re-tried unless
 the whole <code>~!</code> pattern is re-tried.
 </p -->
 
-<h3 id="specification">Pattern language construction patterns</h3>
+<h3 id="pattern-language-construction-patterns">Pattern language construction patterns</h3>
 
 <p>
 This SRFI facilitates creation of entirely new pattern-matching forms
@@ -1104,7 +1144,7 @@ pattern rewriting rules (see <code>define-match-pattern</code> below) to employ 
 identifiers in their special role, controlling the rewriting.
 </p>
 
-<h3 id="specification">Defining new patterns</h3>
+<h3 id="defining-new-patterns">Defining new patterns</h3>
 
 <p>
 New patterns can be defined using a pattern rewriting system, replicating the
@@ -1151,7 +1191,7 @@ in the Examples section and in the Appendix below. </p>
 ⟹ (1 (2 . 3) #(4))
 </code></pre>
 
-<h3 id="templates">Elements of templating</h3>
+<h3 id="elements-of-templating">Elements of templating</h3>
 
 <p>
 Although the bulk of this proposal is dedicated to patterns, there are a few things
@@ -1206,7 +1246,7 @@ which variables are unrolled and which are replicated are explicit.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Uses of the <code>etc</code> form can be nested:
 </p>
 
-<code><pre>(<b>match</b> '((0) (1 2) (3 4 5) (6 7 8 9))
+<pre><code>(<b>match</b> '((0) (1 2) (3 4 5) (6 7 8 9))
   [(~etc (~cons x (~etc y*)))
     (etc  (cons x  (etc y*)))])
 ⟹ ((0) (1 2) (3 4 5) (6 7 8 9))
@@ -1216,11 +1256,11 @@ which variables are unrolled and which are replicated are explicit.<br>
    (cons (etc x) (etc y*))])
 ⟹ ((0 1 3 6) () (2) (4 5) (7 8 9))
 
-</pre></code>
+</code></pre>
 
 <h2 id="appendix">Appendix</h2>
 
-<h3 id="specification">Derived pattern types</h3>
+<h3 id="derived-pattern-types">Derived pattern types</h3>
 
 <p>
 This appendix gives possible definitions for some derived pattern types in terms of
