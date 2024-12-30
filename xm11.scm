@@ -1,3 +1,5 @@
+;;; SPDX-FileCopyrightText: 2024 Sergei Egorov
+;;; SPDX-License-Identifier: MIT
 
 ;========================================================================================
 ;
