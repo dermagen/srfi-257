@@ -73,14 +73,14 @@ constructors as they cannot share the same namespace. To stay within the bounds 
 implemented via regular <code>syntax-rules</code>, the choice was made to use tilde-prefixed names,
 so the above pattern becomes <code>(~vector (~cons x y))</code>. This convention is used for all
 forms of patterns except for <code>quote</code> and <code>quasiquote</code>, which have convenient
-reader abbreviations and thus are built-in into the matcher.
+reader abbreviations and thus are built into the matcher.
 </p>
 
 <p>
 Traditional patterns, resembling printed representations, are supported “under quasiquote”,
 as proposed in (withdrawn) <a href="https://srfi.schemers.org/srfi-200/">SRFI-200</a>.
 New types of patterns as well as new forms of pattern languages can be built via
-<code>define-match-pattern</code> form, that provides a <code>syntax-rules</code> -like
+<code>define-match-pattern</code> form, which provides a <code>syntax-rules</code> -like
 mechanism for pattern rewriting.
 </p>
 
@@ -149,8 +149,8 @@ constructor-like and quasiquoted forms:
 
 (first-column '((1 2 3) (4 5 6) (7 8 9))) ⟹ (1 4 7)
 
-</code></pre> <p> This proposal disagrees with “Wright-style” matcher (WSM) on <code>quasquote</code> <code>unquote-splicing</code> patterns; in this proposal, they are
-treated in accordance with the regular quasquote rules, rather than being turned into <code>...</code> repeats: </p> <pre><code>(<b>match</b> (list 1 2) [`(1 2 ,@3) #t] [_ #f]) ⟹ #f ;</code> WSM returns <code>#t
+</code></pre> <p> This proposal disagrees with “Wright-style” matcher (WSM) on <code>quasiquote</code> <code>unquote-splicing</code> patterns; in this proposal, they are
+treated in accordance with the regular quasiquote rules, rather than being turned into <code>...</code> repeats: </p> <pre><code>(<b>match</b> (list 1 2) [`(1 2 ,@3) #t] [_ #f]) ⟹ #f ;</code> WSM returns <code>#t
 (<b>match</b> '(1 2 . 3) [`(1 2 ,@3) #t] [_ #f]) ⟹ #t ;</code> WSM returns <code>#f
 (<b>match</b> (list 1 2 3 3 3) [`(1 2 ,@3) #t] [_ #f]) ⟹ #f ;</code> WSM returns <code>#t
 
@@ -539,19 +539,19 @@ rules in the order they are written until a matching rule is found. If no matchi
 
 <p>
 A rule matches if the application of its pattern to the input object is successful and there is
-no “guard clause” (a list of <code>=&gt;</code> keyword followed by one or two identifiers). If a guard
+no “guard clause” (a list of the <code>=&gt;</code> keyword followed by one or two identifiers). If a guard
 clause is present, it binds the identifiers to procedures allowing advanced control over the matching
 process. The first procedure, bound within the body to ⟨<i>next id</i> ⟩, allows
 one to skip the current rule as if its pattern match was unsuccessful. In two-identifier guard clauses,
 the second procedure, bound within the body to ⟨<i>back id</i> ⟩, allows one to
 tell the matcher that the current pattern should consider another way to match, or, if no such way exists,
-skip the pattern as if its attempts to match were unsuccessful.
+to skip the pattern as if its attempts to match were unsuccessful.
 Both procedures accept no arguments and can be called from any <i>tail position</i> within the
-body. If these procedures called in a different way, the behavior is undefined.
+body. If these procedures are called in a different way, the behavior is undefined.
 </p>
 
 <p>
-Patterns may contain <i>pattern variables</i>, which, if the application of a pattern suceeds, become
+Patterns may contain <i>pattern variables</i>, which, if the application of a pattern succeeds, become
 bound in the corresponding body to parts of the input object. The values of these variables may be
 used to reject the match via the guard clause mechanism described above.
 </p>
@@ -563,7 +563,7 @@ should “agree”, i.e. to be the same according to the <code>equal?</code> pre
 </p>
 
 <p>
-Some patterns, marked as <i>(iterative)</i>  in pattern entry's header line, may match the input
+Some patterns, marked as <i>(iterative)</i>  in the pattern entry's header line, may match the input
 object in multiple ways. The matcher tries these different matches in the order specified in the
 pattern description. The two common orders are <i>(iterative, greedy)</i> , maximizing the number
 of input elements matched by sub-patterns on the left, and <i>(iterative, non-greedy)</i> , maximizing
@@ -601,8 +601,8 @@ the same pattern, or to use them as ⟨<i>match pattern name</i> ⟩s.
 
 <p>
 <code>(<b>quote</b></code> ⟨<i>datum</i> ⟩<code>)</code>&nbsp;&nbsp;<i>match pattern</i><br>
-The <code>quote</code> pattern matches ⟨<i>datum</i> ⟩ (again, Scheme <code>equal?</code>
-predicate is used for comparison).
+The <code>quote</code> pattern matches ⟨<i>datum</i> ⟩.  Again, the Scheme <code>equal?</code>
+predicate is used for comparison.
 </p>
 
 <p>
@@ -638,8 +638,8 @@ abbreviated form, first matching rule is chosen):
 <p>
   <code>(<b>~value</b></code> ⟨<i>expression</i> ⟩<code>)</code>&nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~value</code> pattern matches if the input object is equal to the result of
-  ⟨<i>expression</i> ⟩, calculated during the match (Scheme <code>equal?</code>
-  predicate is used for comparison). This is a convenient way to match against non-pattern variables,
+  ⟨<i>expression</i> ⟩, calculated during the match.  The Scheme <code>equal?</code>
+  predicate is used for comparison. This is a convenient way to match against non-pattern variables
   bound outside the <code>match</code> form.
 </p>
 
@@ -647,8 +647,8 @@ abbreviated form, first matching rule is chosen):
 <h3 id="specification">List patterns</h3>
 
 <p>List patterns match various types of pairs/lists, disassembling them into sub-expressions
-and applying to them sub-patterns. They are named to resemble the corresponding Scheme constructors
-and can be combined in a similar manner. Their names are not built-in into the matcher, but
+and applying to them sub-patterns. They are named to resemble the corresponding Scheme constructors,
+and can be combined in a similar manner. Their names are not built into the matcher, but
 are defined via <code>define-syntax</code> or its equivalent, so they need to be imported
 if used explicitly.
 </p>
@@ -656,8 +656,8 @@ if used explicitly.
 <p>
 <code>(<b>~cons</b></code> ⟨<i>mp</i> <sub>a</sub>⟩ ⟨<i>mp</i> <sub>d</sub>⟩<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
-The <code>~cons</code> pattern matches a pair, which <i>car</i>  matches
-⟨<i>mp</i> <sub>a</sub>⟩ and <i>cdr</i>  matches
+The <code>~cons</code> pattern matches a pair whose <i>car</i>  matches
+⟨<i>mp</i> <sub>a</sub>⟩ and whose <i>cdr</i>  matches
 ⟨<i>mp</i> <sub>d</sub>⟩.
 </p>
 
@@ -678,7 +678,7 @@ The <code>~cons</code> pattern matches a pair, which <i>car</i>  matches
   pattern is applied to its improper tail segment.<br>
   &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  This is an example of a <i>iterative</i>
   pattern that may match the target list in many different ways; all “solutions” are equally good,
-  as long as the segments can be appended via <code>append</code> to make a list, equal to the original.<br>
+  as long as the segments can be appended via <code>append</code> to make a list equal to the original.<br>
   &nbsp;&nbsp;&nbsp;&nbsp;The solutions are tried starting with ones maximizing the length of the leftmost
   segment, then the segment after it, etc.
 </p>
@@ -896,8 +896,8 @@ belonging to the “successful” sub-pattern will have their values bound to th
 corresponding sub-values. The remaining variables are bound to <code>#f</code>.
 If there are no sub-patterns, the <code>(~or)</code> pattern fails on every object.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  this pattern is iterative in the following
-sense: if backtracking exausts all possible match solutions for one sub-pattern, the next
-one is tried, then the next one etc.
+sense: if backtracking exhausts all possible match solutions for one sub-pattern, the next
+one is tried, then the next one, etc.
 </p>
 
 <p>
@@ -952,8 +952,8 @@ and then evaluates the <code>(</code>⟨<i>fn</i> ⟩
 ⟨<i>iv</i> ⟩<code>)</code> expression; its result is matched
 against the ⟨<i>mp</i> ⟩ sub-pattern.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  ⟨<i>fn</i> ⟩ does not have
-to name a function, it can be of any form. The combined expression is evaluated
-as-is so the matching process may be interrupted in case of errors.
+to name a function; it can be of any form. The combined expression is evaluated
+as is so the matching process may be interrupted in case of errors.
 </p>
 
 <p>
@@ -968,8 +968,8 @@ to <code>#f</code>, the pattern fails. Otherwise, the input object is matched
 against ⟨<i>mp</i> ⟩… sub-patterns, combined via
 <code>~and</code> (i.e. all of them should match).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  ⟨<i>fn</i> ⟩ does not have
-to name a function, it can be of any form. The expression is evaluated
-as-is, so the matching process may be interrupted in case of errors.
+to name a function; it can be of any form. The expression is evaluated
+as is, so the matching process may be interrupted in case of errors.
 </p>
 
 <h3 id="specification">Core patterns</h3>
@@ -995,8 +995,8 @@ and then evaluates the <code>(</code>⟨<i>fn</i> ⟩ ⟨<i>iv</i> ⟩
 ⟨<i>arg</i> ⟩…<code>)</code> expression; its results are matched against the
 ⟨<i>mp</i> ⟩ … sub-patterns.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  ⟨<i>fn</i> ⟩ does not have
-to name a function, it can be of any form. The combined expression is evaluated
-as-is, so the matching process may be interrupted in case of errors.
+to name a function; it can be of any form. The combined expression is evaluated
+as is, so the matching process may be interrupted in case of errors.
 </p>
 
 <p>
@@ -1020,8 +1020,8 @@ the pattern fails. Otherwise, if ⟨<i>mp</i> ⟩
 sub-pattern is present, it should also match the result; if it is absent, the match just
 succeeds.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  ⟨<i>fn</i> ⟩ does not have
-to name a function, it can be of any form. The expression is evaluated
-as-is, so the matching process may be interrupted in case of errors.
+to name a function; it can be of any form. The expression is evaluated
+as is, so the matching process may be interrupted in case of errors.
 </p>
 
 <p>
@@ -1174,7 +1174,7 @@ taken apart, e.g.:
 
 <p>
 Things get more complicated when one has to deal with “ellipsis” expressions. To
-re-construct them, one has to use <code>map</code> with a <code>lambda</code>-expression
+re-construct them, one has to use <code>map</code> with a <code>lambda</code> expression
 containing the element construction code. To simplify this process, two extra syntax forms are provided.
 </p>
 
@@ -1183,7 +1183,7 @@ containing the element construction code. To simplify this process, two extra sy
   &nbsp;&nbsp;<i>procedure or syntax</i><br>
 This form just evaluates ⟨<i>expression</i> ⟩ and returns its
 value, complementing the <code>~value</code> pattern. It is also the only form other
-than <code>quote</code>, recognized by name by the <code>etc</code> syntax form:
+than <code>quote</code> recognized by name by the <code>etc</code> syntax form:
 </p>
 
 <p>
@@ -1196,9 +1196,9 @@ an identifier, a quoted S-expression (a two element list starting with <code>quo
 a <code>value</code> expression (see above), or an application or macro use in a form of a list that
 starts with an identifier, followed by zero or more ⟨<i>constructor</i> ⟩s. <br>
 &nbsp;&nbsp;&nbsp;&nbsp;The <code>etc</code> form is expanded as follows: first, it is
-scanned for variables (it collects all identifiers outside of <code>quote</code> and <code>value</code>
-forms, not used as head identifiers of an application or macro use). Then, a <code>map</code> application
-is built, with <code>lambda</code> form with the collected variables as formal parameters
+scanned for variables.  It collects all identifiers outside of <code>quote</code> and <code>value</code>
+forms that are not used as head identifiers of an application or macro use. Then, a <code>map</code> application
+is built, with a <code>lambda</code> form with the collected variables as formal parameters
 and the ⟨<i>constructor</i> ⟩ as its body, followed by the same
 variables as the lists for <code>map</code> to process. The variables do not have to be
 taken from patterns, they can come from any place in the current context; all decisions on
