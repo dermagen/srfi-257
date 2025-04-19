@@ -5,13 +5,13 @@
 
 (test-begin "srfi-257")
 
-(define-syntax test-matcher 
+(define-syntax test-matcher
   (syntax-rules ()
     ((_ matcher (in out) ...)
      (let ((m matcher))
        (test-equal 'out (matcher 'in)) ...))))
 
-(define-syntax test-restart 
+(define-syntax test-restart
   (syntax-rules ()
     ((_ matcher-k in . outs)
      (let ((mk matcher-k) (v '()))

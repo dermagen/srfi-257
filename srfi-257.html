@@ -1275,7 +1275,7 @@ which variables are unrolled and which are replicated are explicit.<br>
 <h2 id="sublibs">Sublibraries and optional features</h2>
 
 <p>
-In addition to the above syntax forms exported by the main <code>(srfi 257)</code> library, 
+In addition to the above syntax forms exported by the main <code>(srfi 257)</code> library,
 there are two utility libraries, which could be defined portably in terms of the core but
 are provided as convenience extensions. The <code>box</code> sublibrary is defined
 conditionally, based on support for <a href="/srfi-111/">SRFI 111</a>.
@@ -1292,22 +1292,22 @@ The <code>(srfi 257 misc)</code> sublibrary exports miscellaneous forms defined 
     &nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~etc+</code> pattern matches a proper nonempty list such that every one
   of its elements matches ⟨<i>mp</i> ⟩. It is equivalent to the <code>~etc</code> pattern,
-  constrained to fail on empty lists. 
+  constrained to fail on empty lists.
 </p>
 
 <p>
   <code>(<b>~etc=</b></code> ⟨<i>lp</i> ⟩ ⟨<i>mp</i> ⟩<code>)</code>
     &nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~etc=</code> pattern matches a proper list such that its length matches the
-  ⟨<i>lp</i> ⟩ pattern, and every one of its elements matches the ⟨<i>mp</i> ⟩ pattern. 
-  It is equivalent to the <code>~etc</code> pattern, constrained by list length. 
+  ⟨<i>lp</i> ⟩ pattern, and every one of its elements matches the ⟨<i>mp</i> ⟩ pattern.
+  It is equivalent to the <code>~etc</code> pattern, constrained by list length.
 </p>
 
 <p>
   <code>(<b>~etc**</b></code> ⟨<i>k</i> ⟩ ⟨<i>j</i> ⟩ ⟨<i>mp</i> ⟩<code>)</code>
     &nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~etc**</code> pattern matches a proper list such that its length lies in a range,
-  defined by the ⟨<i>k</i> ⟩ and ⟨<i>j</i> ⟩ expressions (inclusive), and every one of its elements matches the ⟨<i>mp</i> ⟩ pattern. 
+  defined by the ⟨<i>k</i> ⟩ and ⟨<i>j</i> ⟩ expressions (inclusive), and every one of its elements matches the ⟨<i>mp</i> ⟩ pattern.
   It is equivalent to the <code>~etc</code> pattern, constrained by list length.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  The first two arguments are expressions, evaluated
   each time the pattern is considered for a match.<br>
@@ -1316,7 +1316,7 @@ The <code>(srfi 257 misc)</code> sublibrary exports miscellaneous forms defined 
 <p>
   <code>(<b>cm-match</b></code> ⟨<i>expression</i> ⟩ ⟨<i>cm-rule</i> ⟩<code> &hellip;)</code>
     &nbsp;&nbsp;<i>syntax</i><br>
-  The <code>cm-match</code> form implements a variant of Dybvig-Friedman-Hilsdale 
+  The <code>cm-match</code> form implements a variant of Dybvig-Friedman-Hilsdale
   matcher, as specified in <a href="/srfi-241/">SRFI 241</a>. Compared to the original, <code>cm-match</code>
   is more compact, but it does not implement D-F-H matcher's enhanced right-hand-side <code>quasiquote</code>.
 </p>
@@ -1328,22 +1328,22 @@ The <code>(srfi 257 misc)</code> sublibrary exports miscellaneous forms defined 
   -like pattern conventions: a symbolic pattern is treated as ⟨<i>match pattern name</i> ⟩
   unless it is contained in the list of ⟨<i>literals</i> ⟩. Each ⟨<i>sr-rule</i> ⟩
   is similar to the regular ⟨<i>match rule</i> ⟩ as described in the main specification,
-  with the following change: instead of ⟨<i>match pattern</i> ⟩, 
+  with the following change: instead of ⟨<i>match pattern</i> ⟩,
   ⟨<i>sr-rule</i> ⟩ starts with an ⟨<i>sr-pattern</i> ⟩, which is either an
-  empty list (matches itself), an ⟨<i>atomic datum</i> ⟩ (matches any 
+  empty list (matches itself), an ⟨<i>atomic datum</i> ⟩ (matches any
   <code>equal?</code> object), an ⟨<i>underscore</i> ⟩ (matches any object),
-  a ⟨<i>match pattern name</i> ⟩ (matches and binds any object), a ⟨<i>literal</i> ⟩ 
+  a ⟨<i>match pattern name</i> ⟩ (matches and binds any object), a ⟨<i>literal</i> ⟩
   (matches itself), or a pair/vector of ⟨<i>sr-pattern</i> ⟩s, matched recursively
   with a similarly-structured objects. If element of a list or vector is immediately followed
   by an ⟨<i>ellipsis</i> ⟩, this element is matched as if implicitly wrapped in <code>~etc</code>
-  pattern; as <code>syntax-rules</code>, <code>sr-match</code> does not support multiple 
-  ellipses on the same level.    
+  pattern; as <code>syntax-rules</code>, <code>sr-match</code> does not support multiple
+  ellipses on the same level.
 </p>
 
 <h3 id="sublibs-box">The ‘box’ sublibrary</h3>
 
 <p>
-Systems that support <a href="/srfi-111/">SRFI 111</a> may provide <code>(srfi 257 box)</code> 
+Systems that support <a href="/srfi-111/">SRFI 111</a> may provide <code>(srfi 257 box)</code>
 sublibrary exporting the following match patterns.
 </p>
 
@@ -1367,7 +1367,7 @@ combined with the <code>~and</code> pattern combinator.
 
 <p>
   Systems that support boxes and <code>#&amp;</code> read syntax for box literals (e.g. Chez Scheme)
-  may support box literal patterns as part of ⟨<i>match pattern</i> ⟩, as well as both 
+  may support box literal patterns as part of ⟨<i>match pattern</i> ⟩, as well as both
   <code>cm-match</code> and <code>sr-match</code> patterns.
 </p>
 

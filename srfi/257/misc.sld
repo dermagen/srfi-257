@@ -3,7 +3,7 @@
 
 (define-library (srfi 257 misc)
   (import (scheme base) (srfi 257))
-  (export 
+  (export
     ~etc+ ~etc= ~etc**
     cm-match -> guard
     sr-match)

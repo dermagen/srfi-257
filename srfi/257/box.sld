@@ -7,11 +7,11 @@
 
 (begin
 
-(define-match-pattern ~box? () 
+(define-match-pattern ~box? ()
   ((_ p ...) (~and (~test box?) p ...)))
 
 
-(define-match-pattern ~box () 
+(define-match-pattern ~box ()
   ((_ p) (~and (~test box?) (~prop unbox => p))))
 
 ))
