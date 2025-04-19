@@ -65,6 +65,14 @@ SPDX-License-Identifier: MIT
     </ul>
   </li>
   <li>
+    <a href="#sublibs">Sublibraries and optional features</a>
+    <ul>
+      <li><a href="#sublibs-misc">The ‘misc’ sublibrary</a></li>
+      <li><a href="#sublibs-box">The ‘box’ sublibrary</a></li>
+      <li><a href="#optional-features">Optional features</a></li>
+    </ul>
+  </li>
+  <li>
     <a href="#appendix">Appendix</a>
     <ul>
       <li><a href="#derived-pattern-types">Derived pattern types</a></li>
@@ -571,7 +579,8 @@ The grammar rules for the <code>match</code> form are:
 <br>
 </p>
 
-<p>Note: <code>_</code> <code>...</code> and <code>=&gt;</code> in this specification are auxiliary syntaxes
+<p>Note: <code>_</code>&thinsp;, <code>...</code>&thinsp;, <code>=&gt;</code>, <code>quote</code>, <code>quasiquote</code>,
+<code>unquote</code>, and <code>unquote-splicing</code> in this specification are used as auxiliary syntaxes
 identical to the like-named syntaxes exported by the standard libraries.
 </p>
 
@@ -1263,6 +1272,108 @@ which variables are unrolled and which are replicated are explicit.<br>
 
 </code></pre>
 
+<h2 id="sublibs">Sublibraries and optional features</h2>
+
+<p>
+In addition to the above syntax forms exported by the main <code>(srfi 257)</code> library, 
+there are two utility libraries, which could be defined portably in terms of the core but
+are provided as convenience extensions. The <code>box</code> sublibrary is defined
+conditionally, based on support for <a href="/srfi-111/">SRFI 111</a>.
+</p>
+
+<h3 id="sublibs-misc">The ‘misc’ sublibrary</h3>
+
+<p>
+The <code>(srfi 257 misc)</code> sublibrary exports miscellaneous forms defined in the Examples section.
+</p>
+
+<p>
+  <code>(<b>~etc+</b></code> ⟨<i>mp</i> ⟩<code>)</code>
+    &nbsp;&nbsp;<i>match pattern</i><br>
+  The <code>~etc+</code> pattern matches a proper nonempty list such that every one
+  of its elements matches ⟨<i>mp</i> ⟩. It is equivalent to the <code>~etc</code> pattern,
+  constrained to fail on empty lists. 
+</p>
+
+<p>
+  <code>(<b>~etc=</b></code> ⟨<i>lp</i> ⟩ ⟨<i>mp</i> ⟩<code>)</code>
+    &nbsp;&nbsp;<i>match pattern</i><br>
+  The <code>~etc=</code> pattern matches a proper list such that its length matches the
+  ⟨<i>lp</i> ⟩ pattern, and every one of its elements matches the ⟨<i>mp</i> ⟩ pattern. 
+  It is equivalent to the <code>~etc</code> pattern, constrained by list length. 
+</p>
+
+<p>
+  <code>(<b>~etc**</b></code> ⟨<i>k</i> ⟩ ⟨<i>j</i> ⟩ ⟨<i>mp</i> ⟩<code>)</code>
+    &nbsp;&nbsp;<i>match pattern</i><br>
+  The <code>~etc**</code> pattern matches a proper list such that its length lies in a range,
+  defined by the ⟨<i>k</i> ⟩ and ⟨<i>j</i> ⟩ expressions (inclusive), and every one of its elements matches the ⟨<i>mp</i> ⟩ pattern. 
+  It is equivalent to the <code>~etc</code> pattern, constrained by list length.<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i>  The first two arguments are expressions, evaluated
+  each time the pattern is considered for a match.<br>
+</p>
+
+<p>
+  <code>(<b>cm-match</b></code> ⟨<i>expression</i> ⟩ ⟨<i>cm-rule</i> ⟩<code> &hellip;)</code>
+    &nbsp;&nbsp;<i>syntax</i><br>
+  The <code>cm-match</code> form implements a variant of Dybvig-Friedman-Hilsdale 
+  matcher, as specified in <a href="/srfi-241/">SRFI 241</a>. Compared to the original, <code>cm-match</code>
+  is more compact, but it does not implement D-F-H matcher's enhanced right-hand-side <code>quasiquote</code>.
+</p>
+
+<p>
+  <code>(<b>sr-match</b></code> ⟨<i>expression</i> ⟩ ⟨<i>literals</i> ⟩ ⟨<i>sr-rule</i> ⟩<code> &hellip;)</code>
+    &nbsp;&nbsp;<i>syntax</i><br>
+  The <code>sr-match</code> form implements a matcher that uses <code>syntax-rules</code>
+  -like pattern conventions: a symbolic pattern is treated as ⟨<i>match pattern name</i> ⟩
+  unless it is contained in the list of ⟨<i>literals</i> ⟩. Each ⟨<i>sr-rule</i> ⟩
+  is similar to the regular ⟨<i>match rule</i> ⟩ as described in the main specification,
+  with the following change: instead of ⟨<i>match pattern</i> ⟩, 
+  ⟨<i>sr-rule</i> ⟩ starts with an ⟨<i>sr-pattern</i> ⟩, which is either an
+  empty list (matches itself), an ⟨<i>atomic datum</i> ⟩ (matches any 
+  <code>equal?</code> object), an ⟨<i>underscore</i> ⟩ (matches any object),
+  a ⟨<i>match pattern name</i> ⟩ (matches and binds any object), a ⟨<i>literal</i> ⟩ 
+  (matches itself), or a pair/vector of ⟨<i>sr-pattern</i> ⟩s, matched recursively
+  with a similarly-structured objects. If element of a list or vector is immediately followed
+  by an ⟨<i>ellipsis</i> ⟩, this element is matched as if implicitly wrapped in <code>~etc</code>
+  pattern; as <code>syntax-rules</code>, <code>sr-match</code> does not support multiple 
+  ellipses on the same level.    
+</p>
+
+<h3 id="sublibs-box">The ‘box’ sublibrary</h3>
+
+<p>
+Systems that support <a href="/srfi-111/">SRFI 111</a> may provide <code>(srfi 257 box)</code> 
+sublibrary exporting the following match patterns.
+</p>
+
+<p>
+  <code>(<b>~box?</b></code> ⟨<i>mp</i> ⟩ …<code>)</code>
+    &nbsp;&nbsp;<i>match pattern</i><br>
+This pattern matches if the input object satisfies the <code>box?</code> predicate, and
+if there are sub-patterns, <em>all</em> sub-patterns match the same input object, as if
+combined with the <code>~and</code> pattern combinator.
+</p>
+
+<p>
+  <code>(<b>~box</b></code> ⟨<i>mp</i> ⟩<code>)</code>
+    &nbsp;&nbsp;<i>match pattern</i><br>
+  The <code>~box</code> pattern matches a box input object; its contents
+  should match the ⟨<i>mp</i> ⟩ subpattern.
+</p>
+
+
+<h3 id="optional-features">Optional features</h3>
+
+<p>
+  Systems that support boxes and <code>#&amp;</code> read syntax for box literals (e.g. Chez Scheme)
+  may support box literal patterns as part of ⟨<i>match pattern</i> ⟩, as well as both 
+  <code>cm-match</code> and <code>sr-match</code> patterns.
+</p>
+
+<br/>
+
+
 <h2 id="appendix">Appendix</h2>
 
 <h3 id="derived-pattern-types">Derived pattern types</h3>
@@ -1354,17 +1465,22 @@ It runs on many R6RS and R7RS and some R5RS Schemes.
 
 <a href="xm11.scm">Source for the sample implementation.</a>
 
+<p>
+  The SRFI-257 repository also contains R7RS libraries and a SRFI-64-based test suite.
+</p>
+
 <h2 id="acknowledgements">Acknowledgements</h2>
 
 <p>
 This proposal is both based on and inspired by the work of the following people:
 Andrew K. Wright, Robert Cartwright, Alex Shinn, R. Kent Dybvig, Dan Friedman, Erik Hilsdale,
-Chris Hanson, Gerald Jay Sussman, Marc Nieper-Wißkirchen, Dimitris Vyzovitis, and Panicz Maciej Godek.
-I am grateful to Andrew Pochinsky and Daphne Preston-Kendal for their feedback.
+Chris Hanson, Gerald Jay Sussman, Marc Nieper-Wißkirchen, Dimitris Vyzovitis, Felix Thibault,
+and Panicz Maciej Godek.
+I am grateful to Andrew Pochinsky, Daphne Preston-Kendal, and John Cowan for their feedback.
 </p>
 
 <h2 id="copyright">Copyright</h2>
-<p>© 202? Sergei Egorov</p>
+<p>© 2024 Sergei Egorov</p>
 
 <p>
   Permission is hereby granted, free of charge, to any person
