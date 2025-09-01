@@ -780,7 +780,7 @@ The <code>~cons</code> pattern matches a pair whose <i>car</i>  matches
   <code>(<b>~etcse</b></code> ⟨<i>mp</i> ⟩<code>)</code>
     &nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~etcse</code> pattern works similarly to the <code>~etc</code> pattern,
-  but it never fails on proper lists (‘sine errore’ mode). If an element of
+  but it never fails on proper lists (<em>sine errore</em> mode). If an element of
   the input list does not match the ⟨<i>mp</i> ⟩ subpattern, it is skipped.
 </p>
 
@@ -1387,7 +1387,7 @@ match patterns. All match patterns below fail on non-string input objects.
 <p>
 <code>(<b>rx</b></code> ⟨<i>sre</i> ⟩&hellip;<code>)</code>
   &nbsp;&nbsp;<i>syntax</i><br>
-The <code>rx</code> regexp constructor is reexported verbatim from SRFI 115, so
+The <code>rx</code> regexp constructor is re-exported verbatim from SRFI 115, so
 there is no need to import it separately for simple uses.
 </p>
 
@@ -1448,10 +1448,10 @@ fail even if ⟨<i>re</i> ⟩ matches no substrings; the ‘+’ ones fail if 
 In the first pair of patterns, the ⟨<i>mp</i> ⟩&hellip; subpatterns are matched against the parallel
 lists of the submatch/capture strings as described above; their original order in the input string
 is preserved.
-The ‘etc’/‘etc+’ patterns wrap their ⟨<i>mp</i> ⟩&hellip; subpatterns in an impilcit <code>~etc</code>
+The ‘etc’/‘etc+’ patterns wrap their ⟨<i>mp</i> ⟩&hellip; subpatterns in an implicit <code>~etc</code>
 pattern, so they are matched against individual substrings before being aggregated into lists. This
 is useful if additional constraints need to be set on individual substrings to filter the resulting lists.
-The ‘etcse’ pattern wraps its ⟨<i>mp</i> ⟩&hellip; subpatterns in an impilicit <code>~etcse</code>
+The ‘etcse’ pattern wraps its ⟨<i>mp</i> ⟩&hellip; subpatterns in an implicit <code>~etcse</code>
 pattern, skipping matches that fail the subpattern constraints. Thus, the <code>~/etcse</code> pattern
 never fails on any input string.
 </p>
