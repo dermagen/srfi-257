@@ -4,16 +4,16 @@
 (define-library (srfi 257)
   (import (scheme base))
   (export
-    ; aux keywords re-exported from (scheme base) 
+    ; aux keywords re-exported from (scheme base)
     _ ... => quote quasiquote unquote unquote-splicing
     match
-    ~value 
-    ~cons ~list ~append ~append/ng ~append/t 
+    ~value
+    ~cons ~list ~append ~append/ng ~append/t
     ~etc ~etcse ; et cetera sine errore
     ~vector ~vector-append ~vector-append/ng
     ~string ~string-append ~string-append/ng
     ~vector->list ~string->list ~list->vector
-    ~list->string ~string->symbol ~symbol->string 
+    ~list->string ~string->symbol ~symbol->string
     ~string->number ~number->string
     ~null? ~pair? ~list? ~boolean? ~number?
     ~integer? ~vector? ~string? ~symbol? ~char?
@@ -23,7 +23,7 @@
     ~if-id-member ~replace-specials
     define-match-pattern
     value etc)
-  
+
 
 (begin
 ; The matcher as implememted here is quite light on optimization and error checking.
@@ -573,7 +573,7 @@
              ((pair? lxv)
               (let ((axv (car lxv)) (dxv (cdr lxv)))
                 (let-syntax ((n (syntax-rules () ((_ k . a*) (k () . a*)))))
-                  (submatch axv p (b n) ; just skip failed submatches 
+                  (submatch axv p (b n) ; just skip failed submatches
                     (loop dxv (cons v t) ...) (loop dxv t ...)))))
              (else kf))))))
 
