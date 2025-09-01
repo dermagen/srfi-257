@@ -693,6 +693,31 @@
   ((program (let ((if (if x list values))) (if 1 2 3)))
    (begin (let ((if (if x list values))) (call if 1 2 3)))))
 
+; test record matchers
+
+(define-record-type <pare> (kons x y)
+  pare? (x kar) (y kdr))
+
+(define-record-match-pattern (~kons x y)
+  pare? (y kdr) (x kar)) ; not order-sensitive!
+
+(define-record-match-pattern (~v2 a b)
+  (lambda (x) (and (vector? x) (= (vector-length x) 2)))
+  (a (lambda (v) (vector-ref v 0)))
+  (b (lambda (v) (vector-ref v 1))))
+
+(define (matcher-rec x)
+  (match x
+    ((~kons x y)                      `(kons-of ,x ,y))
+    ((~v2 a b)                        `(v2-of ,a ,b))
+    (w                                `(other ,w))))
+
+(test-equal '(other 1) (matcher-rec 1))
+(test-equal '(other (1 . 4)) (matcher-rec '(1 . 4)))
+(test-equal '(v2-of 5 125) (matcher-rec #(5 125)))
+(test-equal '(kons-of 42 14) (matcher-rec (kons 42 14)))
+
+
 ; box patterns tests
 
 (test-equal #f (match '42 ((~box? a) a) (_ #f)))
