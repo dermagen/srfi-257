@@ -555,7 +555,7 @@
              ((pair? lxv)
               (let ((axv (car lxv)) (dxv (cdr lxv)))
                 (let-syntax ((n (syntax-rules () ((_ k . a*) (k () . a*)))))
-                  (submatch axv p (b n) ; just skip failed submatches 
+                  (submatch axv p (b n) ; just skip failed submatches
                     (loop dxv (cons v t) ...) (loop dxv t ...)))))
              (else kf))))))
 
