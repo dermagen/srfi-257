@@ -82,7 +82,7 @@
            ((_ ev uv (x . y)  k . a*) (subx ev uv x subcdr ev uv y k . a*))
            ;((_ ev uv #&x k . a*) (subx ev uv x rebox k . a*))
            ((_ ev uv #(x (... ...)) k . a*) (subx ev uv (x (... ...)) revec k . a*))
-           ((_ ev uv x k . a*) (classify x (k ev . a*) (k uv . a*) (k x . a*) (syntax-error "r-s?")))))
+           ((_ ev uv x k . a*) (classify x (k ev . a*) (k uv . a*) (k x . a*) (k x . a*)))))
         (subcdr
          (syntax-rules ()
            ((_ sx ev uv y k . a*) (subx ev uv y repair sx k . a*))))
@@ -502,7 +502,7 @@
 
 
 ;
-; 6)  ~etc: ... - like list matcher
+; 6)  ~etc: ... - like list matchers
 ;
 
 ; Nonlinear part of ~etc works as follows: code for p is generated in
@@ -538,6 +538,25 @@
               (let ((axv (car lxv)) (dxv (cdr lxv)))
                 (let-syntax ((n (syntax-rules () ((_ k . a*) (k () . a*)))))
                   (submatch axv p (b n) (loop dxv (cons v t) ...) kf))))
+             (else kf))))))
+
+(define-syntax ~etcse ; sine errore
+  (syntax-rules ()
+    ((_ () (p) (n) kt ()) ; scan for vars
+     (submatch () p (n) kt ()))
+    ((_ xv (p) c kt kf)
+     (extract-pattern-vars p (~etcse xv p c kt kf)))
+    ((_ (v ...) (t ...) xv p (b n) kt kf)
+     (let loop ((lxv xv) (t '()) ...)
+       (cond ((null? lxv)
+              (if (n match:etc-nl-test (v ...) (t ...) ())
+                  (let ((v (reverse t)) ...) kt)
+                  kf))
+             ((pair? lxv)
+              (let ((axv (car lxv)) (dxv (cdr lxv)))
+                (let-syntax ((n (syntax-rules () ((_ k . a*) (k () . a*)))))
+                  (submatch axv p (b n) ; just skip failed submatches 
+                    (loop dxv (cons v t) ...) (loop dxv t ...)))))
              (else kf))))))
 
 
