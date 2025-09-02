@@ -5,51 +5,51 @@
 
 (test-begin "srfi-257-rx")
 
-(test-equal #f 
+(test-equal #f
   (match 42 ((~/ "[0-9]+" a) a) (_ #f)))
 
-(test-equal "42" 
+(test-equal "42"
   (match "42" ((~/ "[0-9]+" a) a) (_ #f)))
 
-(test-equal #f 
+(test-equal #f
   (match 42 ((~/ (rx (+ (/ "09"))) a) a) (_ #f)))
 
-(test-equal "42" 
+(test-equal "42"
   (match "42" ((~/ (rx (+ (/ "09"))) a) a) (_ #f)))
 
 (define phs "home: 301-123-4567; cell: 240-890-1234; fax: 301-567-8901")
 
-(test-equal '("home" "301" "123" "4567") 
+(test-equal '("home" "301" "123" "4567")
   (match phs ((~/sub "({a}*): ({d}*)-({d}*)-({d}*)" _ t a b c) (list t a b c)) (_ #f)))
 
-(test-equal '("home" "301" "123" "4567") 
+(test-equal '("home" "301" "123" "4567")
   (match phs ((~/any "({a}*): ({d}*)-({d}*)-({d}*)" _ t a b c) (list t a b c)) (_ #f)))
 
 (test-equal #f
   (match phs ((~/sub "({a}*): ({d}*)-({d}*)-({d}*)" _ t "240" b c) (list t "240" b c)) (_ #f)))
 
-(test-equal '("cell" "240" "890" "1234") 
+(test-equal '("cell" "240" "890" "1234")
   (match phs ((~/any "({a}*): ({d}*)-({d}*)-({d}*)" _ t "240" b c) (list t "240" b c)) (_ #f)))
 
-(test-equal '("cell" "240" "890" "1234") 
+(test-equal '("cell" "240" "890" "1234")
   (match phs ((~/any "({a}*): ({d}*)-({d}*)-({d}*)" _ t (~and a (~not "301")) b c) (list t a b c)) (_ #f)))
 
-(test-equal #f 
+(test-equal #f
   (match phs ((~/any "({a}*): ({d}*)-({d}*)-({d}*)" _ t "412" b c) (list t "412" b c)) (_ #f)))
 
-(test-equal #f 
+(test-equal #f
   (match phs ((~/all "({a}*): ({d}*)-({d}*)-({d}*)" _ t "412" b c) (list t "412" b c)) (_ #f)))
 
-(test-equal '(("home" "cell" "fax") ("301" "240" "301")) 
+(test-equal '(("home" "cell" "fax") ("301" "240" "301"))
   (match phs ((~/all "({a}*): ({d}*)-({d}*)-({d}*)" _ t a) (list t a)) (_ #f)))
 
-(test-equal #f 
+(test-equal #f
   (match phs ((~/etc "({a}*): ({d}*)-({d}*)-({d}*)" _ t (~and a (~not "240"))) (list t a)) (_ #f)))
 
-(test-equal '(("home" "fax") ("301" "301")) 
+(test-equal '(("home" "fax") ("301" "301"))
   (match phs ((~/etcse "({a}*): ({d}*)-({d}*)-({d}*)" _ t (~and a (~not "240"))) (list t a)) (_ #f)))
 
-(test-equal '(() ()) 
+(test-equal '(() ())
   (match phs ((~/etcse "({a}*): ({d}*)-({d}*)-({d}*)" _ t (~and a "412")) (list t a)) (_ #f)))
 
 
@@ -60,22 +60,22 @@
 ;;;;
 ;;;; SPDX-License-Identifier: BSD-3-Clause
 
-(test-equal '("ababc" "abab") 
+(test-equal '("ababc" "abab")
   (match "ababc" ((~/ (rx ($ (* "ab")) "c") a b) (list a b)) (_ #f)))
-(test-equal '("ababc" "abab") 
+(test-equal '("ababc" "abab")
   (match "ababc" ((~/ "((?:ab)*)c" a b) (list a b)) (_ #f)))
 
-(test-equal '("y") 
+(test-equal '("y")
   (match "xy" ((~/any (rx "y") a) (list a)) (_ #f)))
-(test-equal '("y") 
+(test-equal '("y")
   (match "xy" ((~/any "y" a) (list a)) (_ #f)))
 
-(test-equal '("ababc" "abab") 
+(test-equal '("ababc" "abab")
   (match "xababc" ((~/any (rx ($ (* "ab")) "c") a b) (list a b)) (_ #f)))
-(test-equal '("ababc" "abab") 
+(test-equal '("ababc" "abab")
   (match "xababc" ((~/any "((?:ab)*)c" a b) (list a b)) (_ #f)))
 
-(test-equal #f 
+(test-equal #f
   (match "fooxbafba" ((~/ (rx (* any) ($ "foo" (* any)) ($ "bar" (* any)))) (list)) (_ #f)))
 (test-equal #f
   (match "fooxbafba" ((~/ "{_}*(foo{_}*)(bar{_}*)") (list)) (_ #f)))
@@ -135,7 +135,7 @@
 (test-equal #f
   (match "ababc" ((~/ "{<l}((?:ab)*){l>}c") (list)) (_ #f)))
 
-(test-equal #f 
+(test-equal #f
   (match "ababc" ((~/ (rx ($ (* "ab")) bol "c" eol)) (list)) (_ #f)))
 (test-equal #f
   (match "ababc" ((~/ "((?:ab)*){<l}c{l>}") (list)) (_ #f)))
@@ -145,14 +145,14 @@
 (test-equal '("\nabc\n" "abc")
   (match "\nabc\n" ((~/ "\n*{<l}({a}*){l>}\n*" a b) (list a b)) (_ #f)))
 
-(test-equal #f 
+(test-equal #f
   (match "\n'abc\n" ((~/ (rx (* #\newline) bol ($ (* alpha)) eol (* #\newline))) (list)) (_ #f)))
-(test-equal #f 
+(test-equal #f
   (match "\n'abc\n" ((~/ "\n*{<l}({a}*){l>}\n*") (list)) (_ #f)))
 
 (test-equal #f
   (match "\nabc.\n" ((~/ (rx (* #\newline) bol ($ (* alpha)) eol (* #\newline))) (list)) (_ #f)))
-(test-equal #f 
+(test-equal #f
   (match "\nabc.\n" ((~/ "\n*{<l}({a}*){l>}\n*") (list)) (_ #f)))
 
 (test-equal '("ababc" "abab")
@@ -175,9 +175,9 @@
 (test-equal #f
   (match "ababc" ((~/ "\\<((?:ab)*)\\>c") (list)) (_ #f)))
 
-(test-equal #f 
+(test-equal #f
   (match "ababc" ((~/ (rx ($ (* "ab")) bow "c" eow)) (list)) (_ #f)))
-(test-equal #f 
+(test-equal #f
   (match "ababc" ((~/ "((?:ab)*)\\<c\\>") (list)) (_ #f)))
 
 (test-equal '("  abc  " "abc")
@@ -185,14 +185,14 @@
 (test-equal '("  abc  " "abc")
   (match "  abc  " ((~/ "\\s*\\<({a}*)\\>\\s*" a b) (list a b)) (_ #f)))
 
-(test-equal #f 
+(test-equal #f
   (match " 'abc  " ((~/ (rx (* space) bow ($ (* alpha)) eow (* space))) (list)) (_ #f)))
-(test-equal #f 
+(test-equal #f
   (match " 'abc  " ((~/ "\\s*\\<({a}*)\\>\\s*") (list)) (_ #f)))
 
 (test-equal #f
   (match " abc.  " ((~/ (rx (* space) bow ($ (* alpha)) eow (* space))) (list)) (_ #f)))
-(test-equal #f 
+(test-equal #f
   (match " abc.  " ((~/ "\\s*\\<({a}*)\\>\\s*") (list)) (_ #f)))
 
 (test-equal '("abc  " "abc")
@@ -220,7 +220,7 @@
 (test-equal '("foo")
   (match " foo " ((~/any "foo" a) (list a)) (_ #f)))
 
-(test-equal #f 
+(test-equal #f
   (match " foo " ((~/any (rx nwb "foo" nwb)) (list)) (_ #f)))
 (test-equal #f
   (match " foo " ((~/any "\\Bfoo\\B") (list)) (_ #f)))
@@ -256,17 +256,17 @@
   (match "abcD" ((~/ "(?i){l}*" a) (list a)) (_ #f)))
 
 (test-equal '("123" "456" "789")
-  (match "abc123def456ghi789" ((~/extracted (rx (+ numeric)) l) l))) 
+  (match "abc123def456ghi789" ((~/extracted (rx (+ numeric)) l) l)))
 (test-equal '("123" "456" "789")
-  (match "abc123def456ghi789" ((~/extracted "{d}+" l) l))) 
+  (match "abc123def456ghi789" ((~/extracted "{d}+" l) l)))
 
 (test-equal '("123" "456" "789")
-  (match "abc123def456ghi789" ((~/extracted (rx (* numeric)) l) l))) 
+  (match "abc123def456ghi789" ((~/extracted (rx (* numeric)) l) l)))
 (test-equal '("123" "456" "789")
-  (match "abc123def456ghi789" ((~/extracted "[\\d]*" l) l))) 
+  (match "abc123def456ghi789" ((~/extracted "[\\d]*" l) l)))
 
 (test-equal '("abc" "def" "ghi" "")
-  (match "abc123def456ghi789" ((~/split  (rx (* numeric)) l) l))) 
+  (match "abc123def456ghi789" ((~/split  (rx (* numeric)) l) l)))
 (test-equal '("abc" "def" "ghi" "")
   (match "abc123def456ghi789" ((~/split  "{d}*" l) l)))
 
@@ -275,21 +275,21 @@
 (test-equal '("abc" "def" "ghi" "")
   (match "abc123def456ghi789" ((~/split  "\\d+" l) l)))
 
-(test-equal '("a" "b") 
+(test-equal '("a" "b")
   (match "a b" ((~/split  (rx (+ whitespace)) l) l)))
-(test-equal '("a" "b") 
+(test-equal '("a" "b")
   (match "a b" ((~/split  "{s}+" l) l)))
 
-(test-equal '("a" "" "b") 
+(test-equal '("a" "" "b")
   (match "a,,b" ((~/split  (rx (",;")) l) l)))
-(test-equal '("a" "" "b") 
+(test-equal '("a" "" "b")
   (match "a,,b" ((~/split  "[,;]" l) l)))
 
-(test-equal '("a" "" "b" "") 
+(test-equal '("a" "" "b" "")
   (match "a,,b," ((~/split  (rx (",;")) l) l)))
-(test-equal '("a" "" "b" "") 
+(test-equal '("a" "" "b" "")
   (match "a,,b," ((~/split  "[,;]" l) l)))
-      
+
 (test-equal '("")
   (match "" ((~/partitioned (rx (* numeric)) l) l)))
 (test-equal '("")

@@ -29,6 +29,7 @@ SPDX-License-Identifier: MIT
       <li>60-day deadline: 2024-02-27</li>
       <li>Draft #1 published: 2024-12-29</li>
       <li>Draft #2 published: 2025-04-18</li>
+      <li>Draft #3 published: 2025-09-01</li>
     </ul>
 
 <h2 id="toc">Table of contents</h2>
@@ -796,7 +797,7 @@ The <code>~cons</code> pattern matches a pair whose <i>car</i>  matches
   <code>(<b>~etcse</b></code> ⟨<i>mp</i> ⟩<code>)</code>
     &nbsp;&nbsp;<i>match pattern</i><br>
   The <code>~etcse</code> pattern works similarly to the <code>~etc</code> pattern,
-  but it never fails on proper lists (‘sine errore’ mode). If an element of
+  but it never fails on proper lists (<em>sine errore</em> mode). If an element of
   the input list does not match the ⟨<i>mp</i> ⟩ subpattern, it is skipped.
 </p>
 
@@ -1336,8 +1337,8 @@ which variables are unrolled and which are replicated are explicit.<br>
 In addition to the above syntax forms exported by the main <code>(srfi 257)</code> library,
 there are three utility libraries, which could be defined portably in terms of the core but
 are provided as convenience extensions. The <code>box</code> and <code>rx</code> sublibraries
-are defined conditionally, based on support for <a href="/srfi-111/">SRFI 111</a> and
-<a href="/srfi-115/">SRFI 115</a>/<a href="/srfi-264/">SRFI 264</a> respectively.
+are defined conditionally, based on support for <a href="https://srfi.schemers.org/srfi-111/">SRFI 111</a> and
+<a href="https://srfi.schemers.org/srfi-115/">SRFI 115</a>/<a href="https://srfi.schemers.org/srfi-264/">SRFI 264</a> respectively.
 </p>
 
 <h3 id="sublibs-misc">The ‘misc’ sublibrary</h3>
@@ -1376,7 +1377,7 @@ The <code>(srfi 257 misc)</code> sublibrary exports miscellaneous forms defined 
   <code>(<b>cm-match</b></code> ⟨<i>expression</i> ⟩ ⟨<i>cm-rule</i> ⟩<code> &hellip;)</code>
     &nbsp;&nbsp;<i>syntax</i><br>
   The <code>cm-match</code> form implements a variant of Dybvig-Friedman-Hilsdale
-  matcher, as specified in <a href="/srfi-241/">SRFI 241</a>. Compared to the original, <code>cm-match</code>
+  matcher, as specified in <a href="https://srfi.schemers.org/srfi-241/">SRFI 241</a>. Compared to the original, <code>cm-match</code>
   is more compact, but it does not implement D-F-H matcher's enhanced right-hand-side <code>quasiquote</code>.
 </p>
 
@@ -1402,7 +1403,7 @@ The <code>(srfi 257 misc)</code> sublibrary exports miscellaneous forms defined 
 <h3 id="sublibs-box">The ‘box’ sublibrary</h3>
 
 <p>
-Systems that support <a href="/srfi-111/">SRFI 111</a> should provide <code>(srfi 257 box)</code>
+Systems that support <a href="https://srfi.schemers.org/srfi-111/">SRFI 111</a> should provide <code>(srfi 257 box)</code>
 sublibrary exporting the following match patterns.
 </p>
 
@@ -1424,8 +1425,8 @@ combined with the <code>~and</code> pattern combinator.
 <h3 id="sublibs-rx">The ‘rx’ sublibrary</h3>
 
 <p>
-Systems that support <a href="/srfi-115/">SRFI 115</a> (Scheme Regular Expressions) and
-<a href="/srfi-264/">SRFI 264</a> (String syntax for Scheme Regular Expressions)
+Systems that support <a href="https://srfi.schemers.org/srfi-115/">SRFI 115</a> (Scheme Regular Expressions) and
+<a href="https://srfi.schemers.org/srfi-264/">SRFI 264</a> (String syntax for Scheme Regular Expressions)
 should provide <code>(srfi 257 rx)</code> sublibrary exporting the following syntax and
 match patterns. All match patterns below fail on non-string input objects.
 </p>
@@ -1433,15 +1434,15 @@ match patterns. All match patterns below fail on non-string input objects.
 <p>
 <code>(<b>rx</b></code> ⟨<i>sre</i> ⟩&hellip;<code>)</code>
   &nbsp;&nbsp;<i>syntax</i><br>
-The <code>rx</code> regexp constructor is reexported verbatim from SRFI 115, so
+The <code>rx</code> regexp constructor is re-exported verbatim from SRFI 115, so
 there is no need to import it separately for simple uses.
 </p>
 
 <p>
 The ⟨<i>re</i> ⟩ argument in all patterns below is an expression that should evaluate
 to either a regexp (e.g. be a <code>rx</code> macro use), or to a string, which is expected to
-be in <a href="/srfi-264/">SRFI 264</a> SSRE regexp notation. All other arguments are match
-patterns. Procedures mentioned in the descriptions are from <a href="/srfi-115/">SRFI 115</a>.
+be in <a href="https://srfi.schemers.org/srfi-264/">SRFI 264</a> SSRE regexp notation. All other arguments are match
+patterns. Procedures mentioned in the descriptions are from <a href="https://srfi.schemers.org/srfi-115/">SRFI 115</a>.
 </p>
 
 <p>
