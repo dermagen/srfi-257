@@ -17,11 +17,11 @@
     ~string->number ~number->string
     ~null? ~pair? ~list? ~boolean? ~number?
     ~integer? ~vector? ~string? ~symbol? ~char?
-    ~and ~or ~not
+    ~and ~or ~not ~cut!
     ~list* ~list-no-order ~list-no-order* ~= ~?
     ~prop ~test ~iterate
     ~if-id-member ~replace-specials
-    define-match-pattern
+    define-match-pattern define-record-match-pattern
     value etc)
 
 
@@ -651,8 +651,8 @@
     ((_ newp #f xv c kt kf)
      (submatch xv newp c kt kf))))
 
-; 'cut' matcher (does not allow backtracking into p; experimental)
-(define-syntax ~!
+; 'cut' matcher (does not allow backtracking into p)
+(define-syntax ~cut!
   (syntax-rules ()
     ((_ () (p) (n) kt ()) ; scan for vars
      (submatch () p (n) kt ()))
@@ -671,6 +671,13 @@
        (syntax-rules (l ...)
          ((_ xv args c kt kf)
           (submatch xv p c kt kf)) ...)))))
+
+(define-syntax define-record-match-pattern
+  (syntax-rules ()
+    ((_ (~name v ...) pred? (v1 acc . _) ...)
+     (define-match-pattern ~name ()
+       ((_ v ...) (~and (~test pred?) (~prop acc => v1) ...))))))
+
 
 ; NB: all new matchers below are defined via define-match-pattern (no more submatch/hand-coding)
 

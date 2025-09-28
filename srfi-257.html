@@ -319,13 +319,29 @@ It is an error for a pattern to refer to the same variable inside and outside of
 (<b>match</b> #f [(~and x (~not #f)) x] [_ 'fail]) ⟹ fail
 (<b>match</b> 1 [(~not 2) #t]) ⟹ #t
 
-</code></pre> <p> Predicates and fields are supported via <code>~?</code> and <code>~=</code>
-respectively.
-It is an error to refer to pattern variables in non-subpattern parts of these patterns.
+</code></pre> <p>Predicates and fields are supported via <code>~?</code> and <code>~=</code>
+respectively. It is an error to refer to pattern variables in non-subpattern parts of these patterns.
 </p>
 
 <pre><code>(<b>match</b> 1 [(~? odd? x) x]) ⟹ 1
 (<b>match</b> '(a) [(~= car x) x]) ⟹ a
+
+</code></pre> <p>These patterns can be combined to match record-like
+objects having a predicate and field accessors either directly, or via
+a derived pattern, defined with the help of <code>define-match-pattern</code>:
+
+</p>
+
+<pre><code>(<b>define-record-type</b> pare (kons x y) pare? (x kar) (y kdr))
+
+(<b>match</b> (kons 42 24)
+  [(~? pare? (~= kar x) (~= kdr y)) (cons x y)]) ⟹ (42 . 24)
+
+(<b>define-match-pattern</b> ~kons ()
+  [(_ x y) (~? pare? (~= kar x) (~= kdr y))])
+
+(<b>match</b> (kons 42 24)
+  [(~kons x y) (cons x y)]) ⟹ (42 . 24)
 
 </code></pre> <p>Tests that use more than one pattern variable should be implemented
 in the body of the corresponding rule:
@@ -975,6 +991,18 @@ it contains pattern variables, none of them are bound on a successful match
 the same pattern variable inside and outside of a <code>~not</code> pattern.
 </p>
 
+<p>
+  <code>(<b>~cut!</b></code> ⟨<i>mp</i> ⟩<code>)</code>
+    &nbsp;&nbsp;<i>match pattern</i><br>
+The <code>~cut!</code> pattern gives explicit control over backtracking.  
+It first matches its sub-pattern against the input; on first success, 
+it discards every backtracking point that the sub-pattern created before proceeding.  
+Consequently, the sub-pattern yields <em>at most one result</em>&thinsp;: it either
+ fails outright or delivers its first (and only) solution.  
+The name and idea are borrowed from Prolog’s cut operator.
+</p>
+
+
 <h3 id="compatibility-patterns">Compatibility patterns</h3>
 
 <p>
@@ -1218,6 +1246,36 @@ in the Examples section and in the Appendix below. </p>
 ⟹ (1 (2 . 3) #(4))
 </code></pre>
 
+<p>
+Building syntax layers on top of <code>define-match-pattern</code> helps create intuitive
+interfaces for typical scenarios like record matching. The following definition
+form is included in the library.
+</p>
+
+<p>
+  <code>(<b>define-record-match-pattern</b></code>
+  <code>(</code>⟨<i>name</i> ⟩ ⟨<i>field</i> ⟩ …<code>)</code>
+  ⟨<i>predicate</i> ⟩
+  <code>(</code>⟨<i>field</i> ⟩ ⟨<i>accessor</i> ⟩<code>)</code> …
+  <code>)</code>
+  &nbsp;&nbsp;<i>syntax</i><br>
+Thе ⟨<i>name</i> ⟩ is an identifier to be defined as a match pattern.
+The fields in the field-accessor list should be distinct identifiers; the
+list of fields at the head of the form should be a subset of the identifiers
+paired with accessors. The ⟨<i>predicate</i> ⟩ and all ⟨<i>accessor</i> ⟩ forms
+are expressions. Since these expressions are evaluated each time a match is
+attempted, it's best to limit them to either names or simple lambda expressions.
+A sample implementation of this form is shown in the Appendix section.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i> In spite of its intended visual similarity
+to <code>define-record-type</code>,
+this form can be used for any kind of object, not just records. E.g., here we
+use it to define an equivalent of the predefined <code>~cons</code> pattern:
+</p>
+
+<pre><code>(<b>define-record-match-pattern</b> (~pair a d) pair? (a car) (d cdr))
+
+</code></pre>
+
 <h3 id="elements-of-templating">Elements of templating</h3>
 
 <p>
@@ -1404,9 +1462,10 @@ patterns. Procedures mentioned in the descriptions are from <a href="https://srf
   &nbsp;&nbsp;<i>match pattern</i><br>
 The <code>~/</code> pattern matches a string input object; its full contents
 should match the ⟨<i>re</i> ⟩ regexp, as specified by the <code>regexp-matches</code> procedure.
-The ⟨<i>mp</i> ⟩&hellip; subpatterns, as many as present, should match the corresponding regexp submatch
+All present ⟨<i>mp</i> ⟩&hellip; subpatterns should match the corresponding regexp submatch
 strings: first ⟨<i>mp</i> ⟩ should match submatch 0 (the whole input string), the second
-⟨<i>mp</i> ⟩ should match the first regexp capture group, and so on. Note: ⟨<i>mp</i> ⟩s match
+⟨<i>mp</i> ⟩ should match the first regexp capture group, and so on.<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i> ⟨<i>mp</i> ⟩s match
 the initial elements of the list returned by the <code>regexp-match->list</code> procedure;
 the pattern will fail if there are more ⟨<i>mp</i> ⟩s than strings returned by the procedure.
 </p>
@@ -1445,14 +1504,14 @@ that match the ⟨<i>mp</i> ⟩s. Fails if there are no successful matches.
   &nbsp;&nbsp;<i>match pattern</i><br>
 These patterns extract all substrings of the input string matched by the ⟨<i>re</i> ⟩ regexp,
 as specified by the <code>regexp-fold</code> procedure. The ‘all’ match patterns do not
-fail even if ⟨<i>re</i> ⟩ matches no substrings; the ‘+’ ones fail if no substrings are found.
-In the first pair of patterns, the ⟨<i>mp</i> ⟩&hellip; subpatterns are matched against the parallel
+fail even if ⟨<i>re</i> ⟩ matches no substrings; the ‘+’ ones fail if no substrings are found.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;In the first pair of patterns, the ⟨<i>mp</i> ⟩&hellip; subpatterns are matched against the parallel
 lists of the submatch/capture strings as described above; their original order in the input string
-is preserved.
-The ‘etc’/‘etc+’ patterns wrap their ⟨<i>mp</i> ⟩&hellip; subpatterns in an implicit <code>~etc</code>
+is preserved.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The ‘etc’/‘etc+’ patterns wrap their ⟨<i>mp</i> ⟩&hellip; subpatterns in an impilcit <code>~etc</code>
 pattern, so they are matched against individual substrings before being aggregated into lists. This
-is useful if additional constraints need to be set on individual substrings to filter the resulting lists.
-The ‘etcse’ pattern wraps its ⟨<i>mp</i> ⟩&hellip; subpatterns in an implicit <code>~etcse</code>
+is useful if additional constraints need to be set on individual substrings to filter the resulting lists.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The ‘etcse’ pattern wraps its ⟨<i>mp</i> ⟩&hellip; subpatterns in an impilicit <code>~etcse</code>
 pattern, skipping matches that fail the subpattern constraints. Thus, the <code>~/etcse</code> pattern
 never fails on any input string.
 </p>
@@ -1561,6 +1620,13 @@ the basic, logical, and core pattern types.
 
 (<b>define-match-pattern</b> ~? ()
   [(~? f p ...) (~and (~test f) p ...)])
+
+(<b>define-syntax</b> define-record-match-pattern
+  (<b>syntax-rules</b> ()
+    [(_ (~name v ...) pred? (v1 acc) ...)
+     (define-match-pattern ~name ()
+       [(_ v ...) (~and (~test pred?) (~prop acc => v1) ...)])]))
+
 </code></pre>
 
 

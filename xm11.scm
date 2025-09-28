@@ -633,8 +633,8 @@
     ((_ newp #f xv c kt kf)
      (submatch xv newp c kt kf))))
 
-; 'cut' matcher (does not allow backtracking into p; experimental)
-(define-syntax ~!
+; 'cut' matcher (does not allow backtracking into p)
+(define-syntax ~cut!
   (syntax-rules ()
     ((_ () (p) (n) kt ()) ; scan for vars
      (submatch () p (n) kt ()))
@@ -653,6 +653,12 @@
        (syntax-rules (l ...)
          ((_ xv args c kt kf)
           (submatch xv p c kt kf)) ...)))))
+
+(define-syntax define-record-match-pattern
+  (syntax-rules ()
+    ((_ (~name v ...) pred? (v1 acc . _) ...)
+     (define-match-pattern ~name ()
+       ((_ v ...) (~and (~test pred?) (~prop acc => v1) ...))))))
 
 ; NB: all new matchers below are defined via define-match-pattern (no more submatch/hand-coding)
 
@@ -1204,12 +1210,13 @@
     ((1 (1 . 2) (1 . 3) (2 . 6))                (other))))
 
 
-; tests for ~! (cut) matcher
+; tests for ~cut! matcher
 
 (display "\nmatcher-nocut\n")
 (define (matcher-nocut x k)
   (match x
-    ((~append a (~cons (~append b c) d)) (=> next back) (k `(fst ,a ,b ,c ,d)) (back))
+    ((~append a (~cons (~append b c) d)) 
+     (=> next back) (k `(fst ,a ,b ,c ,d)) (back))
     (x (k `(final ,x)))))
 
 (test-restart matcher-nocut
@@ -1225,13 +1232,16 @@
 
 (define (matcher-cut x k)
   (match x
-    ((~append a (~cons (~! (~append b c)) d)) (=> next back) (k `(fst ,a ,b ,c ,d)) (back))
+    ((~append a (~cons (~cut! (~append b c)) d)) 
+     (=> next back) (k `(fst ,a ,b ,c ,d)) (back))
     (x (k `(final ,x)))))
 
 (test-restart matcher-cut
   '((1) (2 3) (4))
-   ; commented-out solutions skipped because of cut
-   ; (there is no longer a bt point inside `(,@b ,@c)
+   ; commented-out solutions skipped because of cut!
+   ; bt points inside (~append b c) are taken off
+   ; the backtracking stack as soon as it produces
+   ; its first solution
   '((fst ((1) (2 3)) (4) () ())
     ;(fst ((1) (2 3)) () (4) ())
     (fst ((1)) (2 3) () ((4)))
@@ -1671,6 +1681,36 @@
   '(((program (let ((if (if x list values))) (if 1 2 3)))
      (begin (let ((if (if x list values))) (call if 1 2 3))))))
 
+; test record matchers
+
+(define-record-type <pare> (kons x y)
+  pare? (x kar) (y kdr))
+
+(define-record-match-pattern (~kons x y)
+  pare? (y kdr) (x kar)) ; not order-sensitive!
+
+(define-record-match-pattern (~v2 a b)
+  (lambda (x) (and (vector? x) (= (vector-length x) 2)))
+  (a (lambda (v) (vector-ref v 0)))
+  (b (lambda (v) (vector-ref v 1))))
+
+(define (matcher-rec x)
+  (match x
+    ((~kons x y)                      `(kons-of ,x ,y))
+    ((~v2 a b)                        `(v2-of ,a ,b))
+    (w                                `(other ,w))))
+
+(display "\ntesting record patterns\n")
+(test-matcher matcher-rec
+  `((1 (other 1))
+    ((1 . 4) (other (1 . 4)))
+    (#(5 125) (v2-of 5 125))
+    (,(kons 42 14) (kons-of 42 14))))
+
+;(test '(other 1) (matcher-rec 1))
+;(test '(other (1 . 4)) (matcher-rec '(1 . 4)))
+;(test '(v2-of 5 125) (matcher-rec #(5 125)))
+;(test '(kons-of 42 14) (matcher-rec (kons 42 14)))
 
 
 ; total balance
