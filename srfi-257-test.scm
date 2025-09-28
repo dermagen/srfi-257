@@ -1,5 +1,5 @@
 (import (scheme base) (srfi 64)
-        (srfi 257) (srfi 257 misc) 
+        (srfi 257) (srfi 257 misc)
         (srfi 111) (srfi 257 box))
 
 ; SRFI 257 Tests (borrowed from many sources)
@@ -326,7 +326,7 @@
 
 (define (matcher-nocut x k)
   (match x
-    ((~append a (~cons (~append b c) d)) 
+    ((~append a (~cons (~append b c) d))
      (=> next back) (k `(fst ,a ,b ,c ,d)) (back))
     (x (k `(final ,x)))))
 
@@ -343,7 +343,7 @@
 
 (define (matcher-cut x k)
   (match x
-    ((~append a (~cons (~cut! (~append b c)) d)) 
+    ((~append a (~cons (~cut! (~append b c)) d))
      (=> next back) (k `(fst ,a ,b ,c ,d)) (back))
     (x (k `(final ,x)))))
 

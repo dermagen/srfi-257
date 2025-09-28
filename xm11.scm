@@ -1215,7 +1215,7 @@
 (display "\nmatcher-nocut\n")
 (define (matcher-nocut x k)
   (match x
-    ((~append a (~cons (~append b c) d)) 
+    ((~append a (~cons (~append b c) d))
      (=> next back) (k `(fst ,a ,b ,c ,d)) (back))
     (x (k `(final ,x)))))
 
@@ -1232,7 +1232,7 @@
 
 (define (matcher-cut x k)
   (match x
-    ((~append a (~cons (~cut! (~append b c)) d)) 
+    ((~append a (~cons (~cut! (~append b c)) d))
      (=> next back) (k `(fst ,a ,b ,c ,d)) (back))
     (x (k `(final ,x)))))
 
