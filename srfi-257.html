@@ -991,6 +991,18 @@ it contains pattern variables, none of them are bound on a successful match
 the same pattern variable inside and outside of a <code>~not</code> pattern.
 </p>
 
+<p>
+  <code>(<b>~cut!</b></code> ⟨<i>mp</i> ⟩<code>)</code>
+    &nbsp;&nbsp;<i>match pattern</i><br>
+The <code>~cut!</code> pattern gives explicit control over backtracking.  
+It first matches its sub-pattern against the input; on first success, 
+it discards every backtracking point that the sub-pattern created before proceeding.  
+Consequently, the sub-pattern yields <em>at most one result</em>&thinsp;: it either
+ fails outright or delivers its first (and only) solution.  
+The name and idea are borrowed from Prolog’s cut operator.
+</p>
+
+
 <h3 id="compatibility-patterns">Compatibility patterns</h3>
 
 <p>
@@ -1235,7 +1247,7 @@ in the Examples section and in the Appendix below. </p>
 </code></pre>
 
 <p>
-Building syntax layers on top of <code>define-record-type</code> helps create intuitive
+Building syntax layers on top of <code>define-match-pattern</code> helps create intuitive
 interfaces for typical scenarios like record matching. The following definition
 form is included in the library.
 </p>
