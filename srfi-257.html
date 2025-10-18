@@ -91,12 +91,11 @@ SPDX-License-Identifier: MIT
 <p>
 Pattern matching extends Scheme's repertoire of conditional constructs, allowing
 decomposition of compound data structures and binding their parts to variables.
-This SRFI proposes one such construct, <code>match</code>, which provides all
-common-denominator functionality described in <a href="https://srfi.schemers.org/srfi-200/">SRFI-200</a>,
-adding on top of it support for non-linear patterns and backtracking. Also, the
-proposed construct is modular, and allows for convenient extension via the
-<code>define-match-pattern</code> mechanism.
-</p>
+This SRFI proposes one such construct, <code>match</code>, which offers all
+the core functionality specified in <a href="https://srfi.schemers.org/srfi-200/">SRFI-200</a>,
+while extending it with support for non-linear patterns and backtracking. 
+The proposed construct is modular and supports easy extension through the <code>define-match-pattern</code> 
+mechanism. It can be implemented portably in R⁷RS-Small.</p>
 
 <h2 id="issues">Issues</h2>
 
@@ -1504,9 +1503,9 @@ that match the ⟨<i>mp</i> ⟩s. Fails if there are no successful matches.
 <code>(<b>~/etcse</b></code> ⟨<i>re</i> ⟩ ⟨<i>mp</i> ⟩&hellip;<code>)</code>
   &nbsp;&nbsp;<i>match pattern</i><br>
 These patterns extract all substrings of the input string matched by the ⟨<i>re</i> ⟩ regexp,
-as specified by the <code>regexp-fold</code> procedure. The ‘all’ match patterns do not
-fail even if ⟨<i>re</i> ⟩ matches no substrings; the ‘+’ ones fail if no substrings are found.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;In the first pair of patterns, the ⟨<i>mp</i> ⟩&hellip; subpatterns are matched against the parallel
+as specified by the <code>regexp-fold</code> procedure. The ‘all’/‘etc’ constructs match patterns do not
+fail even if ⟨<i>re</i> ⟩ matches no substrings; their ‘+’ variants fail if no substrings are found.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;In the ‘all’/‘all+’ patterns, the ⟨<i>mp</i> ⟩&hellip; subpatterns are matched against the parallel
 lists of the submatch/capture strings as described above; their original order in the input string
 is preserved.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The ‘etc’/‘etc+’ patterns wrap their ⟨<i>mp</i> ⟩&hellip; subpatterns in an impilcit <code>~etc</code>
@@ -1635,13 +1634,13 @@ the basic, logical, and core pattern types.
 
 <p>
 Sample <code>syntax-rules</code>-based implementation is available.
-It runs on many R6RS and R7RS and some R5RS Schemes.
+It runs on many R⁶RS and R⁷RS and some R⁵RS Schemes.
 </p>
 
 <a href="xm11.scm">Source for the sample implementation.</a>
 
 <p>
-  The SRFI-257 repository also contains R7RS libraries and a SRFI-64-based test suite.
+  The SRFI-257 repository also contains R⁷RS libraries and a SRFI-64-based test suite.
 </p>
 
 <h2 id="acknowledgements">Acknowledgements</h2>
@@ -1651,7 +1650,8 @@ This proposal is both based on and inspired by the work of the following people:
 Andrew K. Wright, Robert Cartwright, Alex Shinn, R. Kent Dybvig, Dan Friedman, Erik Hilsdale,
 Chris Hanson, Gerald Jay Sussman, Marc Nieper-Wißkirchen, Dimitris Vyzovitis, Felix Thibault,
 and Panicz Maciej Godek.
-I am grateful to Andrew Pochinsky, Daphne Preston-Kendal, and John Cowan for their feedback.
+I am grateful to Andrew Pochinsky, Daphne Preston-Kendal, John Cowan, and Alex Shinn for their feedback,
+and to Arthur Gleckler, SRFI Editor, for his encouragement and patience.
 Special thanks to Al* Petrofsky and Oleg Kiselyov for lessons in advanced macrology.
 </p>
 
