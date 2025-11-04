@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
     <link rel="stylesheet" href="https://srfi.schemers.org/srfi.css" type="text/css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-     small { font-size: 14px; vertical-align: 2px; }
+     small { font-size: 0.875em; vertical-align: 2px; }
      body  { line-height: 24px; }
      pre  { font-family: inherit; line-height: 20px; }
     </style>
@@ -635,6 +635,33 @@ Any pattern containing pattern variables may use the same variable in more than 
 pattern. In such cases all the corresponding sub-objects, assigned to the repeated variable,
 should “agree”, i.e. to be the same according to the <code>equal?</code> predicate.
 </p>
+
+<p>
+It is an error to refer to a pattern variable from any non-pattern sub-element of the same top pattern.
+Rationale: non-pattern sub-elements usually are ordinary expressions, evaluated during the matching process;
+if they could access pattern variables, the matcher would have to match sub-patterns in a fixed order so that
+every pattern variable has a well-defined value, ruling out many useful optimizations. Unless explicitly specified,
+the matching order is implementation-dependent.
+</p>
+
+<small>
+<p>
+Note: A concern has been raised about the lack of guarantees regarding the static and dynamic environments of non-pattern
+sub-expressions in certain pattern forms. The constraints described above limit the set of match forms with
+well-defined semantics. This design choice aims to give implementations additional latitude for optimization —
+such as reordering tests to minimize computation and fail early — and to support a declarative, purely functional
+view of the pattern language. This is especially valuable given the added complexity of features such as
+nonlinearity and backtracking. It is also forward-compatible with the approach advocated by some critics:
+placing non-pattern expressions outside the scope of all pattern variables, should that approach become prevalent.
+There are also cases where leveraging a “natural” left-to-right binding and matching order would be beneficial.
+For example, new forms of nonlinearity might be expressed more conveniently, reducing reliance on guard clauses
+and post hoc validation. To support this, a companion matching form, <code>match*</code>, could be introduced.
+This form would explicitly enforce left-to-right matching and scoping, making pattern variables immediately
+available for downstream reference. As with the distinction between <code>letrec</code> and <code>letrec*</code>,
+a separate form would make the programmer’s intent clear.
+</p>
+</small>
+
 
 <p>
 Some patterns, marked as <i>(iterative)</i>  in the pattern entry's header line, may match the input
@@ -1651,7 +1678,8 @@ This proposal is both based on and inspired by the work of the following people:
 Andrew K. Wright, Robert Cartwright, Alex Shinn, R. Kent Dybvig, Dan Friedman, Erik Hilsdale,
 Chris Hanson, Gerald Jay Sussman, Marc Nieper-Wißkirchen, Dimitris Vyzovitis, Felix Thibault,
 and Panicz Maciej Godek.
-I am grateful to Andrew Pochinsky, Daphne Preston-Kendal, John Cowan, and Alex Shinn for their feedback,
+I am grateful to Andrew Pochinsky, Daphne Preston-Kendal, Marc Nieper-Wißkirchen, John Cowan,
+and Alex Shinn for their feedback,
 and to Arthur Gleckler, SRFI Editor, for his encouragement and patience.
 Special thanks to Al* Petrofsky and Oleg Kiselyov for lessons in advanced macrology.
 </p>
